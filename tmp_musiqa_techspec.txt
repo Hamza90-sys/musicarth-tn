@@ -1,0 +1,1020 @@
+
+
+=== PAGE 1 ===
+MUSIQA
+Online Music Education Platform
+Full Technical Specification for Development
+Confidential — For developer use only
+v1.0  ·  2025
+Project
+MUSIQA — Online Music Education Platform
+Document
+Full Technical Specification
+Version
+1.0
+Market
+Tunisia (Phase 1) → Algeria → Morocco (Phase 2)
+Languages
+Arabic (RTL), French, English
+Audience
+Hamza (Lead Developer)
+Status
+Pre-development — Greenfield
+
+
+=== PAGE 2 ===
+MUSIQA PLATFORM — Technical Specification
+Page 2
+Confidential — For developer use only
+v1.0  ·  2025
+Table of Contents
+1.
+Project Overview & Vision
+3
+2.
+User Roles & Personas
+4
+3.
+Feature Specification — MVP v1
+5
+4.
+Recommended Tech Stack
+6
+5.
+System Architecture
+7
+6.
+Database Schema (Core Tables)
+8
+7.
+API Design & Endpoints
+9
+8.
+UI/UX Design Guidelines
+10
+9.
+Internationalisation & RTL Support
+11
+10.
+Video & Streaming Infrastructure
+12
+11.
+Live 1-on-1 Session System
+13
+12.
+Payment & Monetisation
+14
+13.
+Security Requirements
+15
+14.
+Scalability & Performance
+16
+15.
+DevOps & Deployment
+17
+16.
+Phase 2 — Regional Expansion
+18
+
+
+=== PAGE 3 ===
+MUSIQA PLATFORM — Technical Specification
+Page 3
+Confidential — For developer use only
+v1.0  ·  2025
+1
+Project Overview & Vision
+MUSIQA is a trilingual (Arabic/French/English) online music education platform targeting the Maghreb
+region, starting in Tunisia. It addresses a structural gap in traditional conservatory education: fixed
+schedules, geographic barriers, and the inefficiency of forcing students to learn during low-energy time
+windows.
+The platform delivers asynchronous video lessons, live 1-on-1 sessions with certified instructors, progress
+tracking with gamification mechanics, and a community forum — all accessible from any device, at any
+time the student chooses.
+Pillar
+Description
+Flexibility
+Learn any instrument or music production skill on any schedule, any device.
+Quality
+Curated, professional video content from vetted Tunisian and international
+instructors.
+Gamification
+XP, streaks, badges and leaderboards keep students engaged and progressing.
+Community
+Forums, peer feedback, and collaborative challenges build social learning habits.
+Scalability
+Architecture designed from day one to support 100k+ concurrent users across
+three countries.
+Instrument & Discipline Coverage
+String instruments: Guitar (classical, acoustic, electric), Oud, Violin, Bass
+Keyboard: Piano, Synthesizer, Organ
+Percussion: Drums, Derbouka, Bendir (traditional)
+Wind: Flute, Saxophone, Trumpet
+Voice: Classical singing, Pop vocal technique, Maqam vocal tradition
+Music Production: DAW fundamentals, mixing, mastering, sound design (MAO)
+Music Theory & Solfège: Written theory, ear training, harmony
+
+
+=== PAGE 4 ===
+MUSIQA PLATFORM — Technical Specification
+Page 4
+Confidential — For developer use only
+v1.0  ·  2025
+2
+User Roles & Personas
+  Role: Student
+Browse and enroll in courses
+Watch pre-recorded video lessons
+Book and join live 1-on-1 sessions
+Track progress, earn XP, badges, streaks
+Post and reply in community forums
+Manage subscription / purchases
+Set learning schedule reminders
+  Role: Instructor
+Create and publish courses (videos, descriptions, pricing)
+Manage availability calendar for live sessions
+Accept/reject booking requests
+Communicate with students (in-app messaging)
+View earnings dashboard and payout history
+Upload supplementary materials (PDFs, tabs, scores)
+  Role: Admin
+User management (ban, verify, role assign)
+Course review and approval workflow
+Platform analytics dashboard
+Payment and payout management
+Content moderation (forums, uploads)
+Manage discount codes, promotions
+Manage SEO and landing pages
+
+
+=== PAGE 5 ===
+MUSIQA PLATFORM — Technical Specification
+Page 5
+Confidential — For developer use only
+v1.0  ·  2025
+3
+Feature Specification — MVP v1
+3.1 Pre-Recorded Video Lessons
+Course structure
+Courses contain Sections > Lessons hierarchy. Each lesson has a video,
+description, attachments.
+Video player
+Custom player with: playback speed (0.5x–2x), quality selector, subtitles/CC,
+loop section, note-taking sidebar.
+Offline mode
+Mobile apps allow downloading lessons for offline viewing (DRM-protected).
+Progress tracking
+Auto-save progress at video position. Resume exactly where left off.
+Attachments
+PDF sheet music, guitar tabs, chord charts, practice backing tracks
+downloadable per lesson.
+Preview
+First lesson of every course is free preview, no account required.
+Search & filter
+Full-text search by instrument, level (beginner/intermediate/advanced),
+language, duration, rating.
+Ratings & reviews
+Students leave star rating + written review after completing 30% of a course.
+3.2 Live 1-on-1 Sessions
+Booking flow
+Student browses instructor availability calendar → selects slot → pays →
+receives confirmation + calendar invite.
+Session room
+WebRTC video call embedded in platform (no Zoom redirect). Both parties join
+from browser or mobile app.
+Session tools
+Screen share, shared whiteboard, chat sidebar, file share during session.
+Recording
+Optional recording with consent from both parties. Stored 30 days,
+downloadable by student.
+Reminders
+Email + push notifications 24h, 1h, 15min before session.
+Cancellation policy
+Configurable per instructor: free cancel > 24h before, partial refund 12–24h, no
+refund < 12h.
+Rating
+Post-session rating for instructor (and optional student rating for instructors).
+Trial sessions
+Instructors can offer discounted 15-min intro sessions.
+
+
+=== PAGE 6 ===
+MUSIQA PLATFORM — Technical Specification
+Page 6
+Confidential — For developer use only
+v1.0  ·  2025
+3.3 Progress Tracking & Gamification
+XP System — earn XP for completing lessons, sessions, forum posts, streaks
+Levels — 10 student levels (Beginner → Virtuoso) with visual progress bar
+Daily Streak — consecutive-day learning counter with streak shield consumable
+Badges — unlockable achievements: First Course Completed, 7-Day Streak, Genre Master, etc.
+Leaderboards — weekly XP leaderboard per instrument category + global
+Course Certificates — auto-generated PDF certificate on 100% course completion
+Practice Challenges — weekly instructor-assigned or platform-generated practice goals
+Learning Path — curated course sequences per instrument/level with milestone rewards
+3.4 Community & Forum
+Category-based forums: per-instrument, general music theory, gear & equipment, MAO production
+Rich text posts with embedded audio clips (student recordings for feedback)
+Threaded replies with upvote/downvote, best-answer marking by OP
+Instructor AMA (Ask Me Anything) sessions — scheduled live text Q&A; in forum
+Weekly challenges: post a recording of a specific piece for peer feedback
+Moderation tools: flag, hide, ban, pin, lock threads
+Notification system: replies, mentions (@username), new challenge posts
+
+
+=== PAGE 7 ===
+MUSIQA PLATFORM — Technical Specification
+Page 7
+Confidential — For developer use only
+v1.0  ·  2025
+4
+Recommended Tech Stack
+The stack below is chosen for: (a) developer productivity and large talent pool, (b) proven scalability to
+millions of users, (c) strong Maghreb/French community support, (d) cost-efficiency at early stage with
+clear path to scale.
+  Frontend — Web
+Framework
+Next.js 14+ (App Router) — SSR/SSG for SEO, fast page loads, React ecosystem
+Language
+TypeScript — mandatory for type safety and team onboarding
+Styling
+Tailwind CSS + shadcn/ui component library
+State
+Zustand (client state) + TanStack Query (server state / data fetching)
+Video Player
+Video.js with custom skin — HLS adaptive streaming support
+i18n
+next-intl — RTL layout switching for Arabic
+Forms
+React Hook Form + Zod validation
+Animation
+Framer Motion for micro-interactions
+  Mobile — iOS & Android
+Framework
+React Native (Expo) — single codebase, web-compatible component sharing
+Navigation
+Expo Router (file-based, mirrors Next.js patterns)
+Video
+Expo AV + react-native-video with DRM for offline downloads
+Push Notifs
+Expo Notifications (FCM + APNs under the hood)
+  Backend
+Runtime
+Node.js 20 LTS
+Framework
+NestJS — modular, TypeScript-first, dependency injection, scales cleanly
+API
+REST (primary) + WebSocket (Socket.io for real-time: notifications, live session
+signaling)
+Auth
+JWT (access 15min) + Refresh Tokens (30d, rotating) — stored httpOnly cookies
+Validation
+class-validator + class-transformer (NestJS DTOs)
+
+
+=== PAGE 8 ===
+MUSIQA PLATFORM — Technical Specification
+Page 8
+Confidential — For developer use only
+v1.0  ·  2025
+Queue
+BullMQ + Redis — background jobs: email, video processing, payout triggers
+Search
+Meilisearch — fast multilingual full-text search for courses
+  Database
+Primary DB
+PostgreSQL 16 — relational data (users, courses, payments, bookings)
+ORM
+Prisma — type-safe queries, auto-migrations, great DX
+Cache
+Redis (Upstash) — sessions, rate limiting, leaderboard rankings (sorted sets)
+File Storage
+Cloudflare R2 — S3-compatible, zero egress fees, CDN via Cloudflare
+Search Index
+Meilisearch (self-hosted on VPS or Meilisearch Cloud)
+  Video & Streaming
+Platform
+Mux — video hosting, HLS adaptive streaming, thumbnails, analytics
+Upload
+Direct upload to Mux via signed URLs (never through backend)
+DRM
+Mux DRM for offline-protected downloads on mobile
+Live Video
+Daily.co WebRTC SDK — embedded video calls for 1-on-1 sessions
+  Infrastructure & DevOps
+Hosting
+Railway (early stage) → migrate to AWS/Fly.io at scale
+CDN
+Cloudflare (DNS, DDoS protection, edge caching)
+CI/CD
+GitHub Actions — lint, test, build, deploy on merge to main
+Monitoring
+Sentry (errors), Datadog or Grafana (metrics), Uptime Robot (uptime)
+Emails
+Resend (transactional: OTP, booking confirm, receipts) — Arabic/French templates
+Analytics
+PostHog (self-hosted) — product analytics, funnels, session replay
+
+
+=== PAGE 9 ===
+MUSIQA PLATFORM — Technical Specification
+Page 9
+Confidential — For developer use only
+v1.0  ·  2025
+5
+System Architecture
+5.1 High-Level Architecture
+MUSIQA follows a modular monolith architecture at launch (single NestJS codebase, cleanly separated
+modules), with the database, cache, queue worker, and search index as separate services. This avoids
+premature microservice complexity while maintaining a clear path to extract services if/when load
+demands it.
+CLIENT LAYER [Next.js Web App] [React Native iOS App] [React Native Android App] | | |
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ HTTPS + WS ■■■■■■■■■■■■■■ | EDGE /
+CDN LAYER | [Cloudflare] ← static assets, DDoS protection, rate limit at edge | | API
+LAYER | [NestJS API Server]
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ | | | | | [PostgreSQL]
+[Redis] [BullMQ Workers] [Meilisearch] [External APIs] (Prisma ORM) (Cache) (background
+jobs) (search) Mux · Daily · Resend Stripe · Konnect
+5.2 Module Breakdown (NestJS)
+AuthModule — Registration, login, OAuth (Google), JWT refresh, OTP email verification
+UsersModule — Profile management, avatar upload, roles, preferences, language
+CoursesModule — CRUD for courses, sections, lessons, attachments, search index sync
+VideoModule — Mux upload flow, webhook receiver, lesson video status management
+EnrollmentsModule — Enrollment logic, access control, progress tracking, XP award
+SessionsModule — Instructor availability, booking, Daily.co room creation, calendar invites
+PaymentsModule — Stripe + Konnect integration, webhook handling, receipts, refunds
+GamificationModule — XP engine, streak calculation, badge awards, leaderboard (Redis)
+ForumModule — Threads, posts, replies, votes, audio uploads, moderation
+NotificationsModule — Email (Resend), push (Expo), in-app notification feed (Socket.io)
+AdminModule — Dashboard stats, user/content management, payout approval
+SearchModule — Meilisearch indexing for courses, instructors, forum posts
+5.3 Real-Time Events (WebSocket)
+notification:new — push notification to connected client
+session:countdown — countdown timer 5 min before live session
+session:partner_joined — trigger UI state when other party connects
+forum:reply — live reply append without page refresh
+leaderboard:update — push leaderboard changes in real time
+
+
+=== PAGE 10 ===
+MUSIQA PLATFORM — Technical Specification
+Page 10
+Confidential — For developer use only
+v1.0  ·  2025
+6
+Database Schema — Core Tables
+■ Defined in Prisma schema. All tables include created_at, updated_at timestamps.
+  Table: users
+id
+UUID PK
+email
+VARCHAR UNIQUE
+password_hash
+VARCHAR nullable (null if OAuth)
+role
+ENUM: student | instructor | admin
+full_name
+VARCHAR
+avatar_url
+VARCHAR nullable
+language_pref
+ENUM: ar | fr | en
+xp_total
+INT DEFAULT 0
+level
+INT DEFAULT 1
+streak_current
+INT DEFAULT 0
+streak_best
+INT DEFAULT 0
+last_active_date
+DATE
+is_verified
+BOOLEAN DEFAULT false
+is_active
+BOOLEAN DEFAULT true
+
+
+=== PAGE 11 ===
+MUSIQA PLATFORM — Technical Specification
+Page 11
+Confidential — For developer use only
+v1.0  ·  2025
+  Table: courses
+id
+UUID PK
+instructor_id
+UUID FK → users
+title_ar / title_fr / title_en
+VARCHAR (multilingual)
+description_ar / fr / en
+TEXT
+instrument
+VARCHAR
+level
+ENUM: beginner | intermediate | advanced
+price
+DECIMAL(10,2) nullable (null = free)
+thumbnail_url
+VARCHAR
+is_published
+BOOLEAN DEFAULT false
+avg_rating
+DECIMAL(3,2)
+total_students
+INT DEFAULT 0
+preview_video_id
+VARCHAR (Mux ID)
+  Table: lessons
+id
+UUID PK
+section_id
+UUID FK → sections
+title_ar / fr / en
+VARCHAR
+mux_asset_id
+VARCHAR
+mux_playback_id
+VARCHAR
+duration_seconds
+INT
+order_index
+INT
+is_free_preview
+BOOLEAN DEFAULT false
+
+
+=== PAGE 12 ===
+MUSIQA PLATFORM — Technical Specification
+Page 12
+Confidential — For developer use only
+v1.0  ·  2025
+  Table: enrollments
+id
+UUID PK
+student_id
+UUID FK → users
+course_id
+UUID FK → courses
+progress_percent
+INT DEFAULT 0
+completed_at
+TIMESTAMP nullable
+xp_awarded
+BOOLEAN DEFAULT false
+  Table: lesson_progress
+id
+UUID PK
+enrollment_id
+UUID FK → enrollments
+lesson_id
+UUID FK → lessons
+watch_position_seconds
+INT DEFAULT 0
+completed
+BOOLEAN DEFAULT false
+completed_at
+TIMESTAMP nullable
+  Table: live_sessions
+id
+UUID PK
+student_id
+UUID FK → users
+instructor_id
+UUID FK → users
+scheduled_at
+TIMESTAMP
+duration_minutes
+INT
+price_paid
+DECIMAL(10,2)
+daily_room_url
+VARCHAR
+status
+ENUM: pending | confirmed | completed | cancelled
+recording_url
+VARCHAR nullable
+student_rating
+INT nullable 1-5
+
+
+=== PAGE 13 ===
+MUSIQA PLATFORM — Technical Specification
+Page 13
+Confidential — For developer use only
+v1.0  ·  2025
+  Table: payments
+id
+UUID PK
+user_id
+UUID FK → users
+reference_type
+ENUM: course | session | subscription
+reference_id
+UUID
+amount
+DECIMAL(10,2)
+currency
+VARCHAR DEFAULT 'TND'
+provider
+ENUM: stripe | konnect
+provider_payment_id
+VARCHAR
+status
+ENUM: pending | succeeded | failed | refunded
+  Table: badges
+id
+UUID PK
+slug
+VARCHAR UNIQUE (e.g. 'first_course')
+name_ar / fr / en
+VARCHAR
+icon_url
+VARCHAR
+xp_reward
+INT
+  Table: user_badges
+user_id
+UUID FK → users
+badge_id
+UUID FK → badges
+awarded_at
+TIMESTAMP
+PRIMARY KEY
+(user_id, badge_id)
+
+
+=== PAGE 14 ===
+MUSIQA PLATFORM — Technical Specification
+Page 14
+Confidential — For developer use only
+v1.0  ·  2025
+  Table: forum_threads
+id
+UUID PK
+author_id
+UUID FK → users
+category
+VARCHAR
+title
+VARCHAR
+body
+TEXT
+is_pinned
+BOOLEAN DEFAULT false
+is_locked
+BOOLEAN DEFAULT false
+upvotes
+INT DEFAULT 0
+reply_count
+INT DEFAULT 0
+
+
+=== PAGE 15 ===
+MUSIQA PLATFORM — Technical Specification
+Page 15
+Confidential — For developer use only
+v1.0  ·  2025
+7
+API Design & Key Endpoints
+All API routes are prefixed with /api/v1. Authentication via Bearer token (JWT) in Authorization header.
+Error responses follow RFC 7807 problem+json format. All responses are in JSON with consistent { data,
+meta, error } envelope.
+7.x Auth
+POST
+/auth/register
+Register with email+password. Send OTP verification
+email.
+POST
+/auth/login
+Login. Returns access_token + sets refresh_token
+cookie.
+POST
+/auth/refresh
+Rotate refresh token. Returns new access_token.
+POST
+/auth/logout
+Invalidate refresh token.
+POST
+/auth/verify-email
+Verify OTP code from email.
+POST
+/auth/forgot-password
+Send password reset link.
+7.x Courses
+GET
+/courses
+List courses with filters (instrument, level, language,
+price).
+GET
+/courses/:id
+Course detail with sections, lessons, instructor info.
+POST
+/courses
+Create course (instructor only).
+PATCH
+/courses/:id
+Update course metadata.
+POST
+/courses/:id/publish
+Publish course after admin approval.
+POST
+/courses/:id/enroll
+Enroll student (creates enrollment record, initiates
+payment if paid).
+GET
+/courses/:id/progress
+Get student's progress for a course.
+7.x Lessons
+POST
+/lessons/:id/progress
+Update watch position and completion status.
+POST
+/lessons/:id/upload-url
+Get signed Mux upload URL for lesson video.
+7.x Live Sessions
+
+
+=== PAGE 16 ===
+MUSIQA PLATFORM — Technical Specification
+Page 16
+Confidential — For developer use only
+v1.0  ·  2025
+GET
+/instructors/:id/availabili
+ty
+Get available slots for instructor.
+POST
+/sessions/book
+Book a session slot (initiates payment).
+GET
+/sessions/:id/room
+Get Daily.co room token for session (time-gated).
+POST
+/sessions/:id/cancel
+Cancel session. Triggers refund logic.
+POST
+/sessions/:id/rate
+Submit rating after session.
+7.x Forum
+GET
+/forum/threads
+List threads by category with pagination.
+POST
+/forum/threads
+Create new thread.
+GET
+/forum/threads/:id
+Thread with all replies (paginated).
+POST
+/forum/threads/:id/replies
+Add reply.
+POST
+/forum/threads/:id/upvote
+Upvote a thread.
+7.x User / Profile
+GET
+/users/me
+Get current user profile, stats, badges.
+PATCH
+/users/me
+Update profile, language preference, avatar.
+GET
+/users/me/enrollments
+List enrolled courses with progress.
+GET
+/users/me/sessions
+List past and upcoming sessions.
+GET
+/leaderboard
+Weekly XP leaderboard (global + per instrument).
+7.x Payments
+POST
+/payments/create-intent
+Create Stripe/Konnect payment intent.
+POST
+/payments/webhook
+Webhook receiver for payment provider events.
+GET
+/payments/history
+User's payment history.
+
+
+=== PAGE 17 ===
+MUSIQA PLATFORM — Technical Specification
+Page 17
+Confidential — For developer use only
+v1.0  ·  2025
+8
+UI/UX Design Guidelines
+8.1 Design Principles
+Mobile-first — design every screen at 375px width first, scale up to desktop.
+Clarity over cleverness — every UI element has an obvious purpose. No mystery icons.
+Speed perception — skeleton loaders on every async component, optimistic UI updates.
+Accessibility — WCAG 2.1 AA minimum. Sufficient contrast ratios, keyboard navigation, ARIA labels.
+RTL-first for Arabic — layout, icons, text direction all switch correctly in Arabic mode.
+Consistent micro-interactions — button presses, card hovers, success toasts all feel polished.
+Zero dead-ends — every error state has a clear next action. No blank pages.
+8.2 Design Tokens
+Primary
+#7C3AED (Purple) — CTAs, active states, accent
+Primary Light
+#A78BFA — hover states, backgrounds
+Success
+#10B981 (Green) — completion, XP gain, positive feedback
+Warning
+#F59E0B (Amber) — streak warning, expiring sessions
+Danger
+#EF4444 (Red) — errors, destructive actions
+Neutral 900
+#0F0F0F — primary text
+Neutral 500
+#6B7280 — secondary text, placeholders
+Neutral 100
+#F3F4F6 — card backgrounds, dividers
+Font Body
+Inter (400, 500) — Latin/Arabic-friendly
+Font Heading
+Inter (700, 800)
+Font Arabic
+Cairo — specifically optimised for Arabic web readability
+Border Radius
+8px (cards), 12px (modals), 9999px (pills/badges)
+Shadow
+0 1px 3px rgba(0,0,0,0.1), 0 4px 12px rgba(124,58,237,0.1)
+8.3 Key Screen List
+Landing page (hero, featured courses, instruments grid, testimonials, language switcher)
+Course catalogue (search + filters, course cards with thumbnail/rating/price)
+Course detail page (trailer player, curriculum accordion, instructor bio, reviews, enroll CTA)
+
+
+=== PAGE 18 ===
+MUSIQA PLATFORM — Technical Specification
+Page 18
+Confidential — For developer use only
+v1.0  ·  2025
+Video lesson player (custom player + sidebar: notes, attachments, course nav)
+Student dashboard (progress summary, streak, recent activity, upcoming sessions)
+Gamification hub (XP progress, badge collection, leaderboard)
+Instructor profile & booking page (bio, sample videos, availability calendar, reviews)
+Live session room (embedded Daily.co with tools sidebar)
+Community forum (thread list, thread detail, post editor with audio upload)
+Profile & settings (avatar, language, notifications, subscription management)
+Instructor dashboard (earnings, reviews, course stats, schedule management)
+Admin panel (separate route /admin — analytics, moderation, payout approval)
+
+
+=== PAGE 19 ===
+MUSIQA PLATFORM — Technical Specification
+Page 19
+Confidential — For developer use only
+v1.0  ·  2025
+9
+Internationalisation & RTL Support
+9.1 Languages
+The platform supports three languages from day one: Arabic (ar), French (fr), and English (en). Arabic is
+the primary language for the Tunisian market and requires full RTL layout support. Language is
+user-selectable in profile settings and persisted to the database.
+9.2 Implementation
+Use next-intl for Next.js — handles locale routing (/ar, /fr, /en prefix or cookie-based).
+All translatable strings stored in /messages/ar.json, /messages/fr.json, /messages/en.json.
+Database multilingual fields stored as separate columns (title_ar, title_fr, title_en) — simpler than
+JSONB for querying.
+RTL: add dir='rtl' to when locale is 'ar'. Use Tailwind's rtl: modifier for layout flips.
+Font loading: load Cairo for Arabic locale, Inter for FR/EN — conditional in _document or layout.
+Arabic numerals: respect user preference. Default to Eastern Arabic (■■■■) for ar locale unless user
+overrides.
+Date formats: DD/MM/YYYY for TN/DZ/MA. Use date-fns with locale import (ar-TN, fr, en).
+Currency: TND (Tunisian Dinar) for Phase 1. Format: 1 500,000 TND style.
+9.3 RTL Checklist for Developers
+Navigation: logo on RIGHT in RTL, hamburger on LEFT
+Text alignment: text-right in RTL (handled by dir attribute + Tailwind rtl:)
+Icons with directionality (arrows, chevrons): flip horizontally in RTL
+Progress bars: fill from RIGHT in RTL
+Form fields: text input direction follows locale
+Video player controls: mirror layout in RTL
+Toast/notification position: bottom-left in LTR → bottom-right in RTL
+
+
+=== PAGE 20 ===
+MUSIQA PLATFORM — Technical Specification
+Page 20
+Confidential — For developer use only
+v1.0  ·  2025
+10
+Video & Streaming Infrastructure
+All video content is hosted on Mux. The backend never handles raw video files — instructors upload
+directly to Mux via a signed upload URL, keeping server load minimal.
+10.1 Upload Flow
+Step 1: Instructor clicks 'Upload Video' in course editor.
+Step 2: Frontend calls POST /lessons/:id/upload-url → backend creates Mux Direct Upload URL.
+Step 3: Frontend uploads video file directly to Mux using the signed URL (no backend proxy).
+Step 4: Mux processes video (transcoding to HLS, generating thumbnails, running content
+moderation).
+Step 5: Mux fires video.asset.ready webhook → backend updates lesson with mux_asset_id and
+mux_playback_id, sets status to 'ready'.
+Step 6: Frontend polls lesson status or receives WebSocket push → shows video as available.
+10.2 Playback & Security
+Signed playback tokens — each playback URL is signed with JWT, expires in 12h, tied to user ID. No
+public URLs.
+HLS Adaptive Bitrate — Mux auto-generates 360p, 720p, 1080p variants. Player selects based on
+connection.
+DRM for downloads — Mux DRM (Widevine + FairPlay) protects offline downloads on mobile.
+Watermarking — optional text watermark (student email) can be overlaid server-side via Mux overlays.
+Completion tracking — player fires progress event every 30 seconds to POST /lessons/:id/progress.
+
+
+=== PAGE 21 ===
+MUSIQA PLATFORM — Technical Specification
+Page 21
+Confidential — For developer use only
+v1.0  ·  2025
+11
+Live 1-on-1 Session System
+11.1 Booking Flow (Detailed)
+Student selects instructor — From instructor profile, student opens availability calendar widget.
+Slot selection — Calendar shows available 30/45/60-min slots (instructor-configured). Student picks
+slot + duration.
+Payment — Booking confirmation screen → payment flow (Stripe/Konnect). No booking without
+payment.
+Confirmation — On payment success: create live_sessions record, generate Daily.co room (via API),
+send confirmation emails to both parties with calendar .ics attachment.
+Reminders — BullMQ scheduled jobs send email + push at 24h, 1h, 15min before session.
+Session time — Both parties see 'Join Session' button 10 min before scheduled time. Button fetches
+Daily.co room token from backend (time-gated, tokens expire 2h after session start).
+During session — Embedded Daily.co room with: video/audio, screen share, whiteboard, text chat,
+file drop.
+Post-session — Auto-expire room 15min after scheduled end. Trigger: rating prompt to student, XP
+award, payout queue for instructor.
+11.2 Instructor Payout
+Platform takes 20% commission (configurable in admin). Instructor earns 80% of session price.
+Payouts are batched weekly. Admin reviews payout queue and approves.
+Payout methods: bank transfer (RIB) for TN, Wise for international instructors.
+Instructor sees real-time earnings in dashboard: pending, approved, paid breakdown.
+
+
+=== PAGE 22 ===
+MUSIQA PLATFORM — Technical Specification
+Page 22
+Confidential — For developer use only
+v1.0  ·  2025
+12
+Payment & Monetisation
+12.1 Payment Providers
+Two providers are integrated. Stripe handles international cards. Konnect (Tunisian fintech) handles local
+TND payments including Tunisian debit cards and mobile money. The platform detects user locale and
+suggests the appropriate method.
+12.2 Business Models (Design for All — Decide Later)
+■ The business model is not finalised. The architecture supports all three without major refactoring.
+Pay-per-course
+Student pays once per course. Lifetime access. Simple, low friction. Price stored on courses.price. Check
+enrollment record for access.
+Subscription
+Monthly/yearly plan unlocks all courses. Add subscriptions table (plan, status, stripe_subscription_id,
+current_period_end). Access check: active subscription OR owned enrollment.
+Freemium
+Free tier: limited courses. Premium tier: all courses + discounts on live sessions. Same subscription table,
+different plan slug.
+Live sessions
+Always pay-per-session regardless of subscription tier (sessions are instructor time, not platform content).
+12.3 Stripe Implementation Notes
+Use Stripe Checkout (hosted page) for v1 — reduces PCI scope, handles 3DS automatically.
+Webhook endpoint /payments/webhook — verify Stripe-Signature header, handle:
+payment_intent.succeeded, payment_intent.payment_failed, customer.subscription.updated,
+customer.subscription.deleted.
+Store stripe_customer_id on users table after first payment. Reuse for future payments.
+Subscriptions: use Stripe Billing with Products + Prices. Create in Stripe dashboard, reference Price ID
+in code.
+
+
+=== PAGE 23 ===
+MUSIQA PLATFORM — Technical Specification
+Page 23
+Confidential — For developer use only
+v1.0  ·  2025
+13
+Security Requirements
+Authentication & Authorisation
+Passwords hashed with bcrypt (cost factor 12).
+JWT access tokens expire in 15 minutes. Refresh tokens stored httpOnly Secure SameSite=Strict
+cookie.
+Refresh token rotation — every refresh issues a new refresh token and invalidates the old one (stored
+in Redis with TTL).
+Role-based guard on every route (student / instructor / admin). NestJS @Roles() decorator.
+Email OTP verification required before account is active.
+Rate limit auth endpoints: 5 login attempts per 15 min per IP (BullMQ + Redis).
+API Security
+Helmet.js — sets secure HTTP headers (CSP, HSTS, X-Frame-Options).
+CORS — whitelist only known frontend origins (production domain + localhost in dev).
+Input validation on every DTO with class-validator. No raw user input reaches the DB.
+Parameterised queries via Prisma — no raw SQL string concatenation.
+File upload validation: MIME type check server-side (not just extension), max size 500MB for video,
+10MB for other assets.
+Rate limiting: global 100 req/min per user, 20 req/min on write endpoints.
+Data Privacy (GDPR-aligned)
+Data minimisation — only collect what is needed.
+Users can delete their account (soft delete, then hard delete after 30 days).
+Payment data never stored on platform servers — Stripe handles PCI compliance.
+Analytics: use PostHog with IP anonymisation enabled.
+Cookie consent banner required on first visit.
+Content Security
+Video playback via signed tokens — no public HLS URLs.
+User-uploaded audio in forum: scan with open-source audio fingerprinting to flag copyrighted content.
+PDF/attachment downloads served via pre-signed R2 URLs (expire 1h).
+Admin approval required before instructor courses go live.
+
+
+=== PAGE 24 ===
+MUSIQA PLATFORM — Technical Specification
+Page 24
+Confidential — For developer use only
+v1.0  ·  2025
+14
+Scalability & Performance
+Database
+Add indexes on all foreign keys and frequently filtered columns (instrument, level, is_published).
+Paginate all list endpoints (cursor-based pagination preferred over offset for large tables).
+Use Prisma's connection pooling (PgBouncer) when scaling horizontally.
+Read replicas for analytics queries (avoid hitting primary DB with heavy admin dashboard queries).
+Caching Strategy
+Cache course listings in Redis (TTL: 5 min). Invalidate on course publish/update.
+Cache leaderboard rankings in Redis sorted sets — recalculate via BullMQ job every 5 min.
+User session data cached in Redis (avoids DB hit on every request).
+CDN cache static assets (images, fonts, JS bundles) at Cloudflare edge — far-future cache headers.
+Background Jobs (BullMQ)
+Email sending (never block request on email send).
+XP calculation and badge award after lesson completion.
+Streak calculation at midnight per user timezone.
+Instructor payout batch processing (weekly).
+Search index re-sync when course content changes.
+Session reminders scheduled at booking time.
+Frontend Performance
+Next.js ISR (Incremental Static Regeneration) for course catalogue pages — fast load, SEO-friendly.
+Lazy-load images with next/image (automatic WebP conversion, responsive sizes).
+Code splitting — each route is a separate bundle. Heavy libraries (video player) loaded on demand.
+Lighthouse score target: 90+ Performance, 95+ Accessibility on all key pages.
+Bundle size limit: main JS bundle < 200KB gzipped.
+
+
+=== PAGE 25 ===
+MUSIQA PLATFORM — Technical Specification
+Page 25
+Confidential — For developer use only
+v1.0  ·  2025
+15
+DevOps & Deployment
+15.1 Environments
+development
+Local. Docker Compose: PostgreSQL + Redis + Meilisearch. .env.local file.
+staging
+Railway auto-deploy on push to 'staging' branch. Mirrors production config.
+production
+Railway (v1) deploy on merge to 'main'. Promote after staging sign-off.
+15.2 CI/CD Pipeline (GitHub Actions)
+On PR: run ESLint, TypeScript check, unit tests (Jest), Prisma schema validation.
+On merge to staging: build Docker image, run e2e tests (Playwright), deploy to staging.
+On merge to main: deploy to production (zero-downtime rolling deploy), run smoke tests, notify Slack.
+Database migrations run automatically via Prisma migrate deploy in deploy step.
+Secrets managed in GitHub Actions secrets (never in code or .env committed).
+15.3 Monitoring & Alerting
+Sentry — capture all uncaught exceptions in backend (NestJS filter) and frontend (ErrorBoundary).
+Uptime Robot — ping /api/health every 1 min. Alert if down > 2 checks.
+Datadog or Grafana Cloud — DB query time, API response time p50/p95/p99, error rate.
+Alert thresholds: API error rate > 1% → PagerDuty. DB connection pool > 80% → warning alert.
+PostHog dashboards: daily active users, course completion rate, booking conversion rate.
+15.4 Docker Compose (Local Dev)
+version: '3.9' services: postgres: image: postgres:16 environment: POSTGRES_DB:
+musiqa_dev POSTGRES_PASSWORD: secret ports: ['5432:5432'] redis: image: redis:7-alpine
+ports: ['6379:6379'] meilisearch: image: getmeili/meilisearch:latest ports:
+['7700:7700']
+
+
+=== PAGE 26 ===
+MUSIQA PLATFORM — Technical Specification
+Page 26
+Confidential — For developer use only
+v1.0  ·  2025
+16
+Phase 2 — Regional Expansion (Algeria & Morocco)
+The Phase 1 architecture is explicitly designed to expand to Algeria and Morocco without major
+refactoring. The following items require attention for Phase 2:
+Currency
+Add DZD (Algerian Dinar) and MAD (Moroccan Dirham). payments.currency enum already flexible. Add
+local payment providers: CIB/SATIM for Algeria, CMI for Morocco.
+Locale
+Add ar-DZ, ar-MA locale variants (slight dialect differences in UI copy). fr remains shared.
+Content licensing
+Ensure instructor agreements cover all three countries. Add country flag on instructor profile.
+CDN regions
+Add Cloudflare origin rules to route DZ/MA traffic to geographically closer servers.
+Compliance
+Algerian and Moroccan data localisation laws — may require in-country data storage. Monitor regulatory
+requirements.
+Instructor supply
+Build instructor recruitment funnel in DZ/MA simultaneously with Phase 1 content build.
+Marketing localisation
+Landing page city-level personalisation: detect country, show local testimonials, local currency pricing.
+  End of Document — MUSIQA Technical Specification v1.0
+Questions? Reach out to the product team. This document is a living spec — update version number on any
+significant change.

@@ -1,0 +1,8 @@
+# Generated lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+pnpm-lock.yml
+npm-shrinkwrap.json
+bun.lock
+bun.lockb

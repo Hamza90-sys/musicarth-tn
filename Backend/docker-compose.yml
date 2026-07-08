@@ -1,0 +1,60 @@
+# Local development infrastructure (spec §15.4).
+# Brings up PostgreSQL 16, Redis 7, and Meilisearch so local dev matches prod.
+#
+# Usage:
+#   docker compose up -d
+# Then point Backend/.env at these services, e.g.:
+#   DATABASE_URL=postgresql://musiqa:secret@localhost:5432/musiqa_dev
+#   REDIS_HOST=127.0.0.1   REDIS_PORT=6379
+#   MEILI_HOST=http://localhost:7700   MEILI_API_KEY=masterKey
+#
+# Note: Redis 7 here replaces the old Windows Redis 3.x and makes BullMQ
+# (session reminders) work. If port 6379 is already taken by a local Redis
+# service, stop that service first or remap the port below.
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: musiqa
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: musiqa_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U musiqa -d musiqa_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: masterKey
+      MEILI_NO_ANALYTICS: "true"
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili_data:/meili_data
+
+volumes:
+  postgres_data:
+  redis_data:
+  meili_data:

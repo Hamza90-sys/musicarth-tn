@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets — NEVER commit these
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Build output
+dist/
+dist-ssr/
+build/
+.vercel/
+.output/
+.nitro/
+.tanstack/
+
+# Logs & OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Test / tooling
+coverage/
+.turbo/
+
+# CI workflows need a workflow-scoped token to push
+.github/workflows/

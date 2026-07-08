@@ -1,0 +1,670 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // App runtime connection. On Supabase use the pooled connection string
+  // (port 6543, transaction mode). Locally it's just your Postgres URL.
+  url       = env("DATABASE_URL")
+  // Used by `prisma migrate`/`db push`. On Supabase this must be the DIRECT
+  // connection (port 5432) — migrations can't run over the transaction pooler.
+  // Falls back to DATABASE_URL when unset (e.g. local dev), so nothing breaks.
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum LiveSessionStatus {
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum LiveSessionType {
+  ONE_ON_ONE
+  GROUP
+}
+
+enum NotificationType {
+  SYSTEM
+  SESSION
+  FORUM
+}
+
+enum CourseApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum XpSource {
+  LESSON_COMPLETION
+  SESSION_COMPLETION
+  FORUM_THREAD
+  FORUM_REPLY
+  STREAK
+  BONUS
+  ADMIN_ADJUSTMENT
+}
+
+enum ReportTargetType {
+  FORUM_THREAD
+  FORUM_REPLY
+  COURSE
+  USER
+  SESSION
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum FileAssetOwnerType {
+  LESSON
+  FORUM_THREAD
+  FORUM_REPLY
+  PROFILE_AVATAR
+  COURSE_THUMBNAIL
+}
+
+enum VideoStatus {
+  NONE
+  PENDING
+  PROCESSING
+  READY
+  ERRORED
+}
+
+model User {
+  id               String       @id @default(uuid())
+  email            String       @unique
+  passwordHash     String?
+  fullName         String
+  role             UserRole     @default(STUDENT)
+  languagePreference String     @default("en")
+  avatarUrl        String?
+  bio              String?
+  headline         String?
+  payoutMethod     String?   // "bank" | "flouci"
+  bankName         String?
+  bankRib          String?
+  bankAccountHolder String?
+  flouciNumber     String?
+  refreshTokenHash String?
+  deletedAt        DateTime?
+  deletedReason    String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  enrollments      Enrollment[]
+  authoredCourses  Course[]     @relation("CourseInstructor")
+  approvedCourses  Course[]     @relation("CourseApprover")
+  availabilitySlots SessionAvailability[] @relation("InstructorAvailability")
+  sessionAsInstructor LiveSession[] @relation("InstructorSessions")
+  sessionAsStudent LiveSession[] @relation("StudentSessions")
+  sessionParticipations LiveSessionParticipant[] @relation("UserSessionParticipations")
+  forumThreads     ForumThread[]
+  forumReplies     ForumReply[]
+  threadUpvotes    ForumThreadUpvote[]
+  notifications    Notification[]
+  xpEvents         XpEvent[]    @relation("XpEventUser")
+  badges           UserBadge[]
+  streak           UserStreak?
+  fileAssets       FileAsset[]   @relation("FileAssetCreator")
+  reportsFiled     ContentReport[] @relation("ReporterReports")
+  reportsResolved  ContentReport[] @relation("ResolverReports")
+  adminActions     AdminAction[] @relation("AdminActions")
+  reviewedApplications Application[] @relation("ApplicationReviewer")
+  passwordSetupTokens  PasswordSetupToken[]
+  courseReviews        CourseReview[] @relation("UserCourseReviews")
+  payments             Payment[] @relation("UserPayments")
+  coupons              Coupon[] @relation("UserCoupons")
+  wishlist             WishlistItem[] @relation("UserWishlist")
+  platformReview       PlatformReview? @relation("UserPlatformReview")
+  payoutsReceived      Payout[] @relation("InstructorPayouts")
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Application {
+  id            String            @id @default(uuid())
+  role          UserRole
+  status        ApplicationStatus @default(PENDING)
+  fullName      String
+  email         String
+  phone         String
+  country       String
+  city          String
+  address       String?
+  instruments   String?
+  motivation    String?
+  cvFileName    String?
+  cvStoragePath String?
+  reviewNotes   String?
+  reviewedById  String?
+  reviewedAt    DateTime?
+  createdUserId String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  reviewedBy    User?             @relation("ApplicationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model PasswordSetupToken {
+  id         String    @id @default(uuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Course {
+  id           String       @id @default(uuid())
+  title        String
+  subtitle     String?
+  description  String
+  titleFr      String?
+  titleAr      String?
+  descriptionFr String?
+  descriptionAr String?
+  instrument   String       @default("general")
+  level        String       @default("beginner")
+  price        Float?
+  thumbnailUrl String?
+  previewVideoUrl String?
+  whatYouWillLearn String[]  @default([])
+  requirements String[]      @default([])
+  tags         String[]      @default([])
+  isPublished  Boolean      @default(false)
+  approvalStatus CourseApprovalStatus @default(PENDING)
+  approvedById String?
+  approvedAt   DateTime?
+  publishedAt  DateTime?
+  instructorId String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  instructor   User?        @relation("CourseInstructor", fields: [instructorId], references: [id], onDelete: SetNull)
+  approvedBy   User?        @relation("CourseApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  sections     Section[]
+  enrollments  Enrollment[]
+  reviews      CourseReview[]
+  payments     Payment[]
+  wishlistedBy WishlistItem[] @relation("CourseWishlist")
+
+  @@index([isPublished, createdAt])
+  @@index([instructorId])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  userId            String
+  // Exactly one of courseId / availabilityId is set (course purchase vs session booking).
+  courseId          String?
+  availabilityId    String?
+  couponId          String?
+  provider          String        @default("flouci")
+  providerPaymentId String?       @unique
+  amountMillimes    Int
+  // 70/30 revenue split, computed when the payment turns PAID.
+  platformFeeMillimes   Int @default(0)
+  instructorNetMillimes Int @default(0)
+  currency          String        @default("TND")
+  status            PaymentStatus @default(PENDING)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user   User    @relation("UserPayments", fields: [userId], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  coupon Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([courseId])
+}
+
+model Coupon {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  percentOff  Int
+  courseId    String?
+  createdById String
+  maxUses     Int?
+  uses        Int       @default(0)
+  expiresAt   DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  createdBy User      @relation("UserCoupons", fields: [createdById], references: [id], onDelete: Cascade)
+  payments  Payment[]
+
+  @@index([createdById])
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation("UserWishlist", fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation("CourseWishlist", fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+}
+
+model PlatformReview {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserPlatformReview", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Payout {
+  id            String   @id @default(uuid())
+  instructorId  String
+  month         String   // "YYYY-MM"
+  amountMillimes Int
+  note          String?
+  paidAt        DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  instructor User @relation("InstructorPayouts", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@unique([instructorId, month])
+  @@index([month])
+}
+
+
+model CourseReview {
+  id        String   @id @default(uuid())
+  courseId  String
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation("UserCourseReviews", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, userId])
+  @@index([courseId])
+}
+
+model Section {
+  id        String   @id @default(uuid())
+  title     String
+  order     Int
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+
+  @@unique([courseId, order])
+}
+
+model Lesson {
+  id        String   @id @default(uuid())
+  title     String
+  titleFr   String?
+  titleAr   String?
+  content   String?
+  contentFr String?
+  contentAr String?
+  videoUrl  String?
+  muxUploadId   String?     @unique
+  muxAssetId    String?     @unique
+  muxPlaybackId String?
+  videoStatus   VideoStatus @default(NONE)
+  durationSeconds Int?
+  isFreePreview Boolean @default(false)
+  order     Int
+  sectionId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  section   Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  progressRecords LessonProgress[]
+  fileAssets FileAsset[] @relation("LessonFileAssets")
+
+  @@unique([sectionId, order])
+}
+
+model Enrollment {
+  id         String           @id @default(uuid())
+  userId     String
+  courseId   String
+  status     EnrollmentStatus @default(ACTIVE)
+  progress   Int              @default(0)
+  completedAt DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessonProgress LessonProgress[]
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model LessonProgress {
+  id                   String   @id @default(uuid())
+  enrollmentId         String
+  lessonId             String
+  watchPositionSeconds  Int      @default(0)
+  completed            Boolean  @default(false)
+  completedAt          DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, lessonId])
+  @@index([lessonId])
+}
+
+model SessionAvailability {
+  id              String   @id @default(uuid())
+  instructorId    String
+  title           String
+  instrument      String
+  notes           String?
+  price           Float
+  startsAt        DateTime
+  durationMinutes Int
+  isBooked        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  instructor      User     @relation("InstructorAvailability", fields: [instructorId], references: [id], onDelete: Cascade)
+  bookedSession   LiveSession?
+
+  @@index([instructorId, startsAt])
+}
+
+model LiveSession {
+  id              String           @id @default(uuid())
+  availabilityId  String?          @unique
+  title           String
+  instrument      String
+  notes           String?
+  price           Float
+  startsAt        DateTime
+  endsAt          DateTime
+  durationMinutes Int
+  status          LiveSessionStatus @default(SCHEDULED)
+  sessionType     LiveSessionType   @default(ONE_ON_ONE)
+  capacity        Int              @default(1)
+  roomName        String           @unique
+  roomUrl         String?
+  roomToken       String?
+  instructorId    String
+  studentId       String?
+  rating          Int?
+  ratingNote      String?
+  ratedAt         DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  availability    SessionAvailability? @relation(fields: [availabilityId], references: [id], onDelete: SetNull)
+  instructor      User             @relation("InstructorSessions", fields: [instructorId], references: [id], onDelete: Cascade)
+  student         User?            @relation("StudentSessions", fields: [studentId], references: [id], onDelete: SetNull)
+  participants    LiveSessionParticipant[]
+  fileAssets      FileAsset[] @relation("LiveSessionFileAssets")
+
+  @@index([instructorId, startsAt])
+  @@index([studentId, startsAt])
+}
+
+model LiveSessionParticipant {
+  id        String      @id @default(uuid())
+  sessionId String
+  userId    String
+  createdAt DateTime    @default(now())
+
+  session   LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User        @relation("UserSessionParticipations", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([userId])
+}
+
+model ForumThread {
+  id          String   @id @default(uuid())
+  authorId    String
+  category    String
+  title       String
+  body        String
+  isPinned    Boolean  @default(false)
+  isLocked    Boolean  @default(false)
+  isHidden    Boolean  @default(false)
+  hiddenReason String?
+  hiddenAt    DateTime?
+  hiddenById  String?
+  upvotes     Int      @default(0)
+  replyCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replies     ForumReply[]
+  upvoteRecords ForumThreadUpvote[]
+  fileAssets  FileAsset[] @relation("ForumThreadFileAssets")
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+model ForumReply {
+  id        String   @id @default(uuid())
+  threadId  String
+  authorId  String
+  body      String
+  audioUrl  String?
+  isHidden  Boolean  @default(false)
+  hiddenReason String?
+  hiddenAt  DateTime?
+  hiddenById String?
+  upvotes   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  thread    ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author    User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  fileAssets FileAsset[] @relation("ForumReplyFileAssets")
+
+  @@index([threadId, createdAt])
+}
+
+model ForumThreadUpvote {
+  id        String   @id @default(uuid())
+  threadId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  thread    ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([userId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType  @default(SYSTEM)
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Badge {
+  id          String      @id @default(uuid())
+  code        String      @unique
+  title       String
+  description String
+  icon        String?
+  xpThreshold Int?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id         String   @id @default(uuid())
+  userId     String
+  badgeId    String
+  awardedAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge      Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([badgeId])
+}
+
+model XpEvent {
+  id          String    @id @default(uuid())
+  userId      String
+  source      XpSource
+  points      Int
+  instrument  String?
+  meta        Json?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation("XpEventUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([source, createdAt])
+}
+
+model UserStreak {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  currentStreak  Int      @default(0)
+  longestStreak  Int      @default(0)
+  lastActiveAt   DateTime?
+  updatedAt      DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FileAsset {
+  id            String              @id @default(uuid())
+  ownerType     FileAssetOwnerType
+  ownerId       String
+  fileName      String
+  mimeType      String
+  sizeBytes     Int
+  storageKey    String              @unique
+  publicUrl     String?
+  uploadUrl     String?
+  isUploaded    Boolean             @default(false)
+  uploadedAt    DateTime?
+  expiresAt     DateTime?
+  createdById   String?
+  lessonId      String?
+  liveSessionId String?
+  forumThreadId String?
+  forumReplyId  String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  createdBy     User?               @relation("FileAssetCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  lesson        Lesson?             @relation("LessonFileAssets", fields: [lessonId], references: [id], onDelete: Cascade)
+  liveSession   LiveSession?        @relation("LiveSessionFileAssets", fields: [liveSessionId], references: [id], onDelete: Cascade)
+  forumThread   ForumThread?        @relation("ForumThreadFileAssets", fields: [forumThreadId], references: [id], onDelete: Cascade)
+  forumReply    ForumReply?         @relation("ForumReplyFileAssets", fields: [forumReplyId], references: [id], onDelete: Cascade)
+
+  @@index([ownerType, ownerId])
+}
+
+model ContentReport {
+  id            String           @id @default(uuid())
+  reporterId    String
+  targetType    ReportTargetType
+  targetId      String
+  reason        String
+  details       String?
+  status        ReportStatus     @default(PENDING)
+  resolvedById  String?
+  resolvedAt    DateTime?
+  resolutionNotes String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  reporter      User             @relation("ReporterReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy    User?            @relation("ResolverReports", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+}
+
+model AdminAction {
+  id          String   @id @default(uuid())
+  actorId     String
+  action      String
+  entityType  String
+  entityId    String?
+  payload     Json?
+  createdAt   DateTime @default(now())
+
+  actor       User     @relation("AdminActions", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
