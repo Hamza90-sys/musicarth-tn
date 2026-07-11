@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import drums from "@/assets/drums.png";
+import guitar from "@/assets/Guitar1.png";
 
 const sessions = [
   { date: "Thu · 7 PM", title: "Pocket & Groove Workshop", instructor: "Marcus Vale", live: true, seats: 42 },
@@ -12,7 +12,7 @@ export function LiveSessions() {
     <section id="live" className="relative overflow-hidden py-32">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-surface to-white" />
       <motion.img
-        src={drums}
+        src={guitar}
         alt=""
         aria-hidden
         width={1280}
