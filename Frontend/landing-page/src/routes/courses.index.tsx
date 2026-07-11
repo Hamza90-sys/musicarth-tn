@@ -32,7 +32,7 @@ const fetchCourses = async (): Promise<RawCourse[]> => {
 // The full set of instruments a course can belong to (mirrors the instructor
 // course form), so the filter always shows every category — even ones that
 // don't have a published course yet.
-const ALL_INSTRUMENTS = ["piano", "guitar", "violin", "drums", "voice", "theory"];
+const ALL_INSTRUMENTS = ["piano", "guitar", "violin", "drums", "oud", "voice", "theory"];
 
 type PriceFilter = "all" | "free" | "paid";
 type DurationFilter = "all" | "short" | "medium" | "long";

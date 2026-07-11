@@ -6,6 +6,7 @@ import piano from "@/assets/piano.png";
 import guitar from "@/assets/guitar.png";
 import violin from "@/assets/violin.png";
 import drums from "@/assets/drums.png";
+import oud from "@/assets/oud.png";
 
 const courses = [
   {
@@ -47,6 +48,16 @@ const courses = [
     meta: ["8 weeks", "32 lessons", "Beginner"],
     image: drums,
     accent: "from-primary/40 to-fuchsia-300/30",
+  },
+  {
+    id: 4,
+    label: "Course 05",
+    title: "Oud & Maqam",
+    instrument: "oud",
+    desc: "Explore the soul of Arabic music — master the oud, its ornaments, and the language of maqam.",
+    meta: ["12 weeks", "40 lessons", "All levels"],
+    image: oud,
+    accent: "from-amber-400/30 to-primary/30",
   },
 ];
 

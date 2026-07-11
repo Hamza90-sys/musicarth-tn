@@ -11,28 +11,28 @@ export function FinalCTA() {
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-surface to-white" />
       <div className="absolute inset-0 -z-10 aurora-bg opacity-80" />
 
-      {/* Harmony of instruments */}
+      {/* Harmony of instruments. On mobile only the piano shows, centered. */}
       <motion.img src={piano} alt="" aria-hidden width={1280} height={1280} loading="lazy"
         initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 0.4, y: 0 }} viewport={{ once: true }}
         transition={{ duration: 1.4, delay: 0.1 }}
-        className="pointer-events-none absolute -left-40 bottom-0 w-[520px] max-w-none animate-float-slow"
+        className="pointer-events-none absolute max-w-none animate-float-slow left-1/2 top-1/2 -ml-[150px] -mt-[150px] w-[300px] sm:left-[-10rem] sm:top-auto sm:bottom-0 sm:ml-0 sm:mt-0 sm:w-[520px]"
       />
       <motion.img src={violin} alt="" aria-hidden width={1280} height={1280} loading="lazy"
         initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 0.35, y: 0 }} viewport={{ once: true }}
         transition={{ duration: 1.4, delay: 0.2 }}
-        className="pointer-events-none absolute -right-32 top-10 w-[420px] max-w-none animate-float-slow"
+        className="pointer-events-none absolute -right-32 top-10 w-[420px] max-w-none animate-float-slow hidden sm:block"
         style={{ animationDelay: "1s" }}
       />
       <motion.img src={guitar} alt="" aria-hidden width={1280} height={1280} loading="lazy"
         initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 0.3, y: 0 }} viewport={{ once: true }}
         transition={{ duration: 1.4, delay: 0.3 }}
-        className="pointer-events-none absolute right-10 bottom-0 w-[360px] max-w-none animate-float-slow"
+        className="pointer-events-none absolute right-10 bottom-0 w-[360px] max-w-none animate-float-slow hidden sm:block"
         style={{ animationDelay: "2s" }}
       />
       <motion.img src={drums} alt="" aria-hidden width={1280} height={1280} loading="lazy"
         initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 0.28, y: 0 }} viewport={{ once: true }}
         transition={{ duration: 1.4, delay: 0.4 }}
-        className="pointer-events-none absolute left-1/3 top-0 w-[300px] max-w-none animate-float-slow"
+        className="pointer-events-none absolute left-1/3 top-0 w-[300px] max-w-none animate-float-slow hidden sm:block"
         style={{ animationDelay: "1.5s" }}
       />
 

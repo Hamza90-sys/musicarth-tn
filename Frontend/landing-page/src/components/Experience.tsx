@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import violin from "@/assets/violin.png";
+import saxophone from "@/assets/saxophone.png";
 
 const features = [
   { title: "Personalized Path", desc: "Adaptive curriculum that responds to how you play and grow.", icon: "M12 2v20M2 12h20" },
@@ -12,7 +12,7 @@ export function Experience() {
   return (
     <section id="experience" className="relative overflow-hidden py-32 bg-white">
       <motion.img
-        src={violin}
+        src={saxophone}
         alt=""
         aria-hidden
         width={1280}
