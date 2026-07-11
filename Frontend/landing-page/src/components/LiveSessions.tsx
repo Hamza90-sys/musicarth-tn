@@ -22,7 +22,7 @@ export function LiveSessions() {
         whileInView={{ opacity: 0.9, x: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none absolute -left-40 top-1/2 -translate-y-1/2 w-[720px] max-w-none animate-float-slow drop-shadow-[0_40px_60px_oklch(0.3_0.15_295/0.4)]"
+        className="pointer-events-none absolute top-1/2 -translate-y-1/2 max-w-none animate-float-slow drop-shadow-[0_40px_60px_oklch(0.3_0.15_295/0.4)] -left-14 w-[280px] sm:-left-20 sm:w-[720px]"
       />
       <div className="absolute -left-20 top-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,oklch(0.65_0.25_293/0.35)_0%,transparent_65%)] blur-3xl -z-10 animate-pulse-glow" />
 

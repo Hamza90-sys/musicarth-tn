@@ -22,7 +22,7 @@ export function Experience() {
         whileInView={{ opacity: 0.95, x: 0, rotate: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none absolute -right-32 -top-10 w-[640px] max-w-none animate-float-slow drop-shadow-[0_40px_60px_oklch(0.3_0.15_295/0.4)]"
+        className="pointer-events-none absolute max-w-none animate-float-slow drop-shadow-[0_40px_60px_oklch(0.3_0.15_295/0.4)] -right-8 top-6 w-[210px] sm:-right-32 sm:top-6 sm:w-[560px]"
       />
       <div className="absolute -right-10 top-20 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,oklch(0.65_0.25_293/0.3)_0%,transparent_65%)] blur-3xl -z-0 animate-pulse-glow" />
 
