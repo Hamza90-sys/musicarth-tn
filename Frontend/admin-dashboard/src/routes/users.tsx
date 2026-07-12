@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Search, ShieldCheck, GraduationCap, Presentation } from "lucide-react";
+import { Search, ShieldCheck, GraduationCap, Presentation, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { apiFetch, ApiError } from "@/lib/api";
+import { getStoredAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 
 type Role = "STUDENT" | "INSTRUCTOR" | "ADMIN";
@@ -42,6 +43,8 @@ function UsersPage() {
       ),
   });
 
+  const currentUserId = getStoredAuth()?.user.id;
+
   const roleMutation = useMutation({
     mutationFn: ({ userId, newRole }: { userId: string; newRole: Role }) =>
       apiFetch(`/admin/users/${userId}/role`, {
@@ -53,6 +56,15 @@ function UsersPage() {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (e) => setError(e instanceof ApiError ? e.message : "Could not update role"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (userId: string) => apiFetch(`/admin/users/${userId}`, { method: "DELETE" }),
+    onSuccess: async () => {
+      setError(null);
+      await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (e) => setError(e instanceof ApiError ? e.message : "Could not delete account"),
   });
 
   const data = usersQuery.data;
@@ -145,6 +157,26 @@ function UsersPage() {
                       <option value="INSTRUCTOR">INSTRUCTOR</option>
                       <option value="ADMIN">ADMIN</option>
                     </select>
+                    {u.role !== "ADMIN" && u.id !== currentUserId ? (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        disabled={deleteMutation.isPending}
+                        title="Delete account"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              `Delete ${u.fullName}'s account (${u.email})? They will no longer be able to log in.${u.role === "INSTRUCTOR" ? " Their courses will be unpublished." : ""}`,
+                            )
+                          ) {
+                            deleteMutation.mutate(u.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    ) : null}
                   </div>
                 </div>
               );

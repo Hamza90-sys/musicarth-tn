@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -103,6 +104,15 @@ export class AdminController {
     @CurrentUser() user: { sub: string },
   ) {
     return this.adminService.updateUserRole(userId, role, user.sub);
+  }
+
+  @Delete('users/:userId')
+  async deleteUser(
+    @Param('userId') userId: string,
+    @Body('reason') reason: string | undefined,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.adminService.deleteUser(userId, user.sub, reason);
   }
 
   @Patch('courses/:courseId/approval')

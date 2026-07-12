@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ContentReport,
   CourseApprovalStatus,
@@ -109,6 +114,54 @@ export class AdminService {
     ]);
 
     return { items, total, page, limit };
+  }
+
+  /**
+   * Soft-deletes a user account (students/instructors). Their data (payments,
+   * enrollments) is preserved for records; they can no longer log in, and an
+   * instructor's courses are unpublished so nothing keeps selling.
+   */
+  async deleteUser(userId: string, actorId: string, reason?: string) {
+    if (userId === actorId) {
+      throw new BadRequestException('You cannot delete your own account');
+    }
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.deletedAt) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.role === UserRole.ADMIN) {
+      throw new ForbiddenException('Admin accounts cannot be deleted here');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          deletedAt: new Date(),
+          deletedReason: reason ?? null,
+          refreshTokenHash: null, // kill active sessions
+        },
+      });
+      // Unpublish an instructor's courses so they stop selling/showing.
+      if (user.role === UserRole.INSTRUCTOR) {
+        await tx.course.updateMany({
+          where: { instructorId: userId },
+          data: { isPublished: false },
+        });
+      }
+    });
+
+    await this.prisma.adminAction.create({
+      data: {
+        actorId,
+        action: 'USER_DELETE',
+        entityType: 'User',
+        entityId: userId,
+        payload: { reason: reason ?? null, role: user.role },
+      },
+    });
+
+    return { id: userId, deleted: true };
   }
 
   async updateUserRole(userId: string, role: UserRole, actorId: string) {

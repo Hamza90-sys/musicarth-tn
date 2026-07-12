@@ -89,6 +89,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.deletedAt) {
+      throw new UnauthorizedException('This account has been deactivated.');
+    }
+
     if (!user.passwordHash) {
       throw new UnauthorizedException(
         'Your account is not active yet. Set your password using the invite link sent after approval.',
