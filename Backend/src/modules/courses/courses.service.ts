@@ -339,6 +339,57 @@ export class CoursesService {
     }
   }
 
+  /**
+   * Public: real instructors who have at least one published course, ranked by
+   * their average course rating (then by students). Used on the landing page —
+   * returns [] when there are no instructors yet, so the section can hide.
+   */
+  async getFeaturedInstructors(limit = 8) {
+    const instructors = await this.prisma.user.findMany({
+      where: {
+        role: UserRole.INSTRUCTOR,
+        deletedAt: null,
+        authoredCourses: { some: { isPublished: true } },
+      },
+      select: {
+        id: true,
+        fullName: true,
+        headline: true,
+        avatarUrl: true,
+        authoredCourses: {
+          where: { isPublished: true },
+          select: {
+            instrument: true,
+            reviews: { select: { rating: true } },
+            _count: { select: { enrollments: true } },
+          },
+        },
+      },
+      take: 50,
+    });
+
+    return instructors
+      .map((ins) => {
+        const ratings = ins.authoredCourses.flatMap((c) => c.reviews.map((r) => r.rating));
+        const avg = ratings.length
+          ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
+          : null;
+        const students = ins.authoredCourses.reduce((s, c) => s + c._count.enrollments, 0);
+        return {
+          id: ins.id,
+          fullName: ins.fullName,
+          headline: ins.headline,
+          avatarUrl: ins.avatarUrl,
+          instrument: ins.authoredCourses[0]?.instrument ?? null,
+          rating: avg,
+          students,
+          courseCount: ins.authoredCourses.length,
+        };
+      })
+      .sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1) || b.students - a.students)
+      .slice(0, limit);
+  }
+
   async getCourseById(courseId: string) {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },

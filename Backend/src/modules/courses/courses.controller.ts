@@ -38,6 +38,12 @@ export class CoursesController {
     });
   }
 
+  // Public — real top-rated instructors for the landing page.
+  @Get('instructors/featured')
+  async getFeaturedInstructors() {
+    return this.coursesService.getFeaturedInstructors();
+  }
+
   @Get(':courseId')
   async getCourseById(@Param('courseId') courseId: string) {
     return this.coursesService.getCourseById(courseId);

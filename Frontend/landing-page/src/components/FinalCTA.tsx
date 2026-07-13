@@ -71,7 +71,7 @@ export function FinalCTA() {
               Become Instructor
             </a>
           </div>
-          <div className="mt-6 text-xs text-muted-foreground">No credit card · 14-day free trial · Cancel anytime</div>
+          <div className="mt-6 text-xs text-muted-foreground">Vetted instructors · Pay per course · Lifetime access</div>
         </motion.div>
       </div>
     </section>
