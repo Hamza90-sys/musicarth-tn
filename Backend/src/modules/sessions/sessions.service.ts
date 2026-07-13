@@ -47,6 +47,22 @@ export class SessionsService {
     instructorId: string,
     dto: CreateAvailabilityDto,
   ) {
+    const startsAt = new Date(dto.startsAt);
+    if (Number.isNaN(startsAt.getTime())) {
+      throw new BadRequestException('Invalid start time');
+    }
+    if (startsAt.getTime() < Date.now()) {
+      throw new BadRequestException('Start time must be in the future');
+    }
+
+    // 1:1 always has a single seat; a group slot can sell 2–12 seats, each of
+    // which is paid for and booked separately.
+    const sessionType = dto.sessionType ?? LiveSessionType.ONE_ON_ONE;
+    const capacity =
+      sessionType === LiveSessionType.GROUP
+        ? Math.min(12, Math.max(2, dto.capacity ?? 2))
+        : 1;
+
     return this.prisma.sessionAvailability.create({
       data: {
         instructorId,
@@ -54,8 +70,10 @@ export class SessionsService {
         instrument: dto.instrument,
         notes: dto.notes ?? null,
         price: dto.price,
-        startsAt: new Date(dto.startsAt),
+        startsAt,
         durationMinutes: dto.durationMinutes,
+        sessionType,
+        capacity,
       },
       include: {
         instructor: {
@@ -159,13 +177,18 @@ export class SessionsService {
     });
   }
 
+  /**
+   * Books a student into an availability slot. 1:1 slots hold a single seat;
+   * group slots hold several, so many students each pay for and join the *same*
+   * live session. Seats are claimed atomically so a slot can never oversell,
+   * and the call is idempotent (the payment verify path may retry it).
+   */
   async bookSession(userId: string, dto: BookSessionDto) {
     const availability = await this.prisma.sessionAvailability.findUnique({
-      where: {
-        id: dto.availabilityId,
-      },
+      where: { id: dto.availabilityId },
       include: {
         instructor: true,
+        bookedSession: { select: { id: true, participants: { select: { userId: true } } } },
       },
     });
 
@@ -173,84 +196,125 @@ export class SessionsService {
       throw new NotFoundException('Availability slot not found');
     }
 
-    if (availability.isBooked) {
-      throw new ConflictException('This slot has already been booked');
+    // Already in this session? Return it unchanged (idempotent).
+    if (availability.bookedSession?.participants.some((p) => p.userId === userId)) {
+      return this.getBookedSession(availability.bookedSession.id);
     }
 
-    const endsAt = new Date(
-      availability.startsAt.getTime() + availability.durationMinutes * 60 * 1000,
-    );
-    const room = await this.provisionRoom(endsAt);
+    // Atomically claim a seat; fails cleanly when the slot is full.
+    const claimed = await this.prisma.sessionAvailability.updateMany({
+      where: { id: availability.id, seatsTaken: { lt: availability.capacity } },
+      data: { seatsTaken: { increment: 1 } },
+    });
+    if (claimed.count === 0) {
+      throw new ConflictException('This session is full');
+    }
 
-    const session = await this.prisma.$transaction(async (tx) => {
-      const updatedAvailability = await tx.sessionAvailability.update({
+    try {
+      const endsAt = new Date(
+        availability.startsAt.getTime() + availability.durationMinutes * 60 * 1000,
+      );
+
+      let session;
+      if (availability.bookedSession) {
+        // Group slot with an existing session — just add this participant.
+        session = await this.prisma.liveSession.update({
+          where: { id: availability.bookedSession.id },
+          data: { participants: { create: { userId } } },
+          include: this.bookedSessionInclude,
+        });
+      } else {
+        // First booking — provision the shared room and create the session.
+        const room = await this.provisionRoom(endsAt);
+        session = await this.prisma.liveSession.create({
+          data: {
+            availabilityId: availability.id,
+            title: availability.title,
+            instrument: availability.instrument,
+            notes: availability.notes,
+            price: availability.price,
+            startsAt: availability.startsAt,
+            endsAt,
+            durationMinutes: availability.durationMinutes,
+            status: LiveSessionStatus.SCHEDULED,
+            sessionType: availability.sessionType,
+            capacity: availability.capacity,
+            roomName: room.name,
+            roomUrl: room.url,
+            instructorId: availability.instructorId,
+            studentId:
+              availability.sessionType === LiveSessionType.ONE_ON_ONE ? userId : null,
+            participants: { create: { userId } },
+          },
+          include: this.bookedSessionInclude,
+        });
+
+        await this.scheduleSessionJobs({
+          id: session.id,
+          startsAt: session.startsAt,
+          endsAt: session.endsAt,
+          instructorId: session.instructorId,
+          studentId: session.studentId,
+          title: session.title,
+        });
+      }
+
+      // Close the slot once the final seat is sold.
+      const fresh = await this.prisma.sessionAvailability.findUnique({
         where: { id: availability.id },
-        data: { isBooked: true },
+        select: { seatsTaken: true, capacity: true },
       });
+      if (fresh && fresh.seatsTaken >= fresh.capacity) {
+        await this.prisma.sessionAvailability
+          .update({ where: { id: availability.id }, data: { isBooked: true } })
+          .catch(() => undefined);
+      }
 
-      return tx.liveSession.create({
-        data: {
-          availabilityId: updatedAvailability.id,
-          title: updatedAvailability.title,
-          instrument: updatedAvailability.instrument,
-          notes: updatedAvailability.notes,
-          price: updatedAvailability.price,
-          startsAt: updatedAvailability.startsAt,
-          endsAt,
-          durationMinutes: updatedAvailability.durationMinutes,
-          status: LiveSessionStatus.SCHEDULED,
-          roomName: room.name,
-          roomUrl: room.url,
-          instructorId: updatedAvailability.instructorId,
-          studentId: userId,
-        },
-        include: {
-          instructor: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-            },
-          },
-          student: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-            },
-          },
-          availability: true,
-        },
-      });
+      const student = session.participants.find((p) => p.user.id === userId)?.user;
+      await Promise.all([
+        this.notificationsService.createNotification({
+          userId,
+          type: NotificationType.SESSION,
+          title: 'Session booked',
+          body: `${session.title} is booked for ${session.startsAt.toLocaleString()}.`,
+          link: `/sessions/${session.id}`,
+        }),
+        this.notificationsService.createNotification({
+          userId: session.instructorId,
+          type: NotificationType.SESSION,
+          title: 'New session booking',
+          body: `${student?.fullName ?? 'A student'} booked ${session.title}.`,
+          link: `/sessions/${session.id}`,
+        }),
+      ]);
+
+      return session;
+    } catch (error) {
+      // Release the claimed seat if we couldn't complete the booking.
+      await this.prisma.sessionAvailability
+        .updateMany({
+          where: { id: availability.id, seatsTaken: { gt: 0 } },
+          data: { seatsTaken: { decrement: 1 } },
+        })
+        .catch(() => undefined);
+      throw error;
+    }
+  }
+
+  private readonly bookedSessionInclude = {
+    instructor: { select: { id: true, fullName: true, email: true } },
+    student: { select: { id: true, fullName: true, email: true } },
+    participants: {
+      select: { user: { select: { id: true, fullName: true, email: true, avatarUrl: true } } },
+    },
+    availability: true,
+  } as const;
+
+  private getBookedSession(sessionId: string) {
+    return this.prisma.liveSession.findUniqueOrThrow({
+      where: { id: sessionId },
+      include: this.bookedSessionInclude,
     });
-
-    await Promise.all([
-      this.notificationsService.createNotification({
-        userId,
-        type: NotificationType.SESSION,
-        title: 'Session booked',
-        body: `${session.title} is booked for ${session.startsAt.toLocaleString()}.`,
-        link: `/sessions/${session.id}`,
-      }),
-      this.notificationsService.createNotification({
-        userId: session.instructorId,
-        type: NotificationType.SESSION,
-        title: 'New session booking',
-        body: `${session.student?.fullName ?? 'A student'} booked ${session.title}.`,
-        link: `/sessions/${session.id}`,
-      }),
-    ]);
-
-    await this.scheduleSessionJobs({
-      id: session.id,
-      startsAt: session.startsAt,
-      endsAt: session.endsAt,
-      instructorId: session.instructorId,
-      studentId: session.studentId,
-      title: session.title,
-    });
-
-    return session;
   }
 
   /** Students enrolled in any of this instructor's courses — the people they can schedule with. */

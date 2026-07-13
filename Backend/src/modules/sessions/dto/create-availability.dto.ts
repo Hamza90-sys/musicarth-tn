@@ -1,9 +1,13 @@
 import { Type } from 'class-transformer';
+import { LiveSessionType } from '@prisma/client';
 import {
   IsDateString,
+  IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
   MinLength,
@@ -37,4 +41,16 @@ export class CreateAvailabilityDto {
   @IsNumber()
   @Min(0)
   price!: number;
+
+  @IsOptional()
+  @IsEnum(LiveSessionType)
+  sessionType?: LiveSessionType;
+
+  // Number of seats for a group slot. Ignored for 1:1 (forced to 1).
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(2)
+  @Max(12)
+  capacity?: number;
 }

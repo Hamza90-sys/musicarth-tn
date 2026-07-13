@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, CheckCircle2, Clock, PlayCircle, Plus, Video } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, PlayCircle, Plus, Users, Video } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,9 @@ type AvailabilitySlot = {
   price: number;
   startsAt: string;
   durationMinutes: number;
+  sessionType: "ONE_ON_ONE" | "GROUP";
+  capacity: number;
+  seatsTaken: number;
   isBooked: boolean;
   instructor: UserSummary;
 };
@@ -351,20 +354,34 @@ function SessionsPage() {
                 No open availability is currently listed.
               </div>
             ) : (
-              openSlots.map((slot) => (
+              openSlots.map((slot) => {
+                const isGroup = slot.sessionType === "GROUP";
+                const seatsLeft = Math.max(0, slot.capacity - slot.seatsTaken);
+                const full = seatsLeft === 0;
+                return (
                 <div
                   key={slot.id}
                   className="rounded-2xl border border-border/60 p-4 transition-colors hover:bg-muted/30"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-2">
-                      <Badge variant="secondary">{slot.instrument}</Badge>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge variant="secondary">{slot.instrument}</Badge>
+                        {isGroup ? (
+                          <Badge variant="outline" className="gap-1">
+                            <Users className="h-3 w-3" /> Group
+                          </Badge>
+                        ) : null}
+                      </div>
                       <h3 className="font-semibold tracking-tight">{slot.title}</h3>
                       <p className="text-sm text-muted-foreground">
                         {slot.instructor.fullName} • {formatDateTime(slot.startsAt)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {slot.notes ?? "Book this slot to open the live room with the instructor."}
+                        {slot.notes ??
+                          (isGroup
+                            ? "Grab a seat to join this group session."
+                            : "Book this slot to open the live room with the instructor.")}
                       </p>
                       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <span className="inline-flex items-center gap-1.5">
@@ -373,21 +390,32 @@ function SessionsPage() {
                         </span>
                         <span className="inline-flex items-center gap-1.5">
                           <Video className="h-3.5 w-3.5" />
-                          {slot.price.toFixed(0)} TND
+                          {slot.price.toFixed(0)} TND{isGroup ? " / seat" : ""}
                         </span>
+                        {isGroup ? (
+                          <span className={`inline-flex items-center gap-1.5 ${full ? "text-destructive" : "text-primary"}`}>
+                            <Users className="h-3.5 w-3.5" />
+                            {full ? "Full" : `${seatsLeft} of ${slot.capacity} seats left`}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <Button
                       className="shrink-0"
                       onClick={() => bookMutation.mutate(slot)}
-                      disabled={bookMutation.isPending}
+                      disabled={bookMutation.isPending || full}
                     >
                       <Plus className="h-4 w-4" />
-                      {slot.price > 0 ? `Book · ${slot.price.toFixed(0)} TND` : "Book"}
+                      {full
+                        ? "Full"
+                        : slot.price > 0
+                          ? `${isGroup ? "Buy seat" : "Book"} · ${slot.price.toFixed(0)} TND`
+                          : "Book"}
                     </Button>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </CardContent>
         </Card>

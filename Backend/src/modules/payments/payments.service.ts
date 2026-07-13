@@ -154,13 +154,25 @@ export class PaymentsService {
   async createSessionPayment(userId: string, availabilityId: string) {
     const slot = await this.prisma.sessionAvailability.findUnique({
       where: { id: availabilityId },
-      select: { id: true, price: true, isBooked: true, title: true, instructorId: true },
+      select: {
+        id: true,
+        price: true,
+        isBooked: true,
+        seatsTaken: true,
+        capacity: true,
+        title: true,
+        instructorId: true,
+        bookedSession: { select: { participants: { select: { userId: true } } } },
+      },
     });
     if (!slot) {
       throw new NotFoundException('Availability slot not found');
     }
-    if (slot.isBooked) {
-      throw new ConflictException('This slot has already been booked');
+    if (slot.isBooked || slot.seatsTaken >= slot.capacity) {
+      throw new ConflictException('This session is full');
+    }
+    if (slot.bookedSession?.participants.some((p) => p.userId === userId)) {
+      throw new ConflictException('You have already booked this session');
     }
     if (slot.price <= 0) {
       throw new BadRequestException('This slot is free — book it directly');
@@ -246,9 +258,19 @@ export class PaymentsService {
         try {
           await this.sessions.bookSession(payment.userId, { availabilityId: payment.availabilityId });
         } catch (error) {
-          if (!(error instanceof ConflictException)) {
-            this.logger.error(`Booking after payment ${payment.id} failed: ${String(error)}`);
+          if (error instanceof ConflictException) {
+            // The slot filled up between checkout and confirmation (concurrent
+            // last-seat purchase). Refund automatically so the student is never
+            // charged for a seat they didn't get.
+            this.logger.warn(
+              `Slot ${payment.availabilityId} full after payment ${payment.id}; auto-refunding`,
+            );
+            await this.refundPayment(payment.id).catch((e) =>
+              this.logger.error(`Auto-refund for payment ${payment.id} failed: ${String(e)}`),
+            );
+            return { status: PaymentStatus.REFUNDED, enrolled: false };
           }
+          this.logger.error(`Booking after payment ${payment.id} failed: ${String(error)}`);
         }
       }
       return { status: PaymentStatus.PAID, enrolled: true };
