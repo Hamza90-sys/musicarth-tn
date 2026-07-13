@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { apiFetch, ApiError } from "@/lib/api";
 import { getStoredAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -138,13 +145,14 @@ function UsersPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{u.role}</Badge>
-                    <select
-                      className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                    <Badge variant="secondary" className="hidden sm:inline-flex">
+                      {u.role}
+                    </Badge>
+                    <Select
                       value={u.role}
                       disabled={roleMutation.isPending}
-                      onChange={(e) => {
-                        const newRole = e.target.value as Role;
+                      onValueChange={(value) => {
+                        const newRole = value as Role;
                         if (
                           newRole !== u.role &&
                           confirm(`Change ${u.fullName}'s role to ${newRole}?`)
@@ -153,10 +161,15 @@ function UsersPage() {
                         }
                       }}
                     >
-                      <option value="STUDENT">STUDENT</option>
-                      <option value="INSTRUCTOR">INSTRUCTOR</option>
-                      <option value="ADMIN">ADMIN</option>
-                    </select>
+                      <SelectTrigger className="h-9 w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="STUDENT">Student</SelectItem>
+                        <SelectItem value="INSTRUCTOR">Instructor</SelectItem>
+                        <SelectItem value="ADMIN">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
                     {u.role !== "ADMIN" && u.id !== currentUserId ? (
                       <Button
                         size="icon"
