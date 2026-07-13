@@ -109,7 +109,14 @@ export class PaymentsService {
     // A 100%-off coupon skips the gateway entirely.
     if (amountMillimes <= 0 && couponId) {
       const payment = await this.prisma.payment.create({
-        data: { userId, courseId, couponId, amountMillimes: 0, status: PaymentStatus.PAID },
+        data: {
+          userId,
+          courseId,
+          instructorId: course.instructorId,
+          couponId,
+          amountMillimes: 0,
+          status: PaymentStatus.PAID,
+        },
       });
       await this.prisma.coupon.update({ where: { id: couponId }, data: { uses: { increment: 1 } } });
       await this.enrollments.enroll(userId, { courseId }).catch(() => undefined);
@@ -117,7 +124,14 @@ export class PaymentsService {
     }
 
     const payment = await this.prisma.payment.create({
-      data: { userId, courseId, couponId, amountMillimes, status: PaymentStatus.PENDING },
+      data: {
+        userId,
+        courseId,
+        instructorId: course.instructorId,
+        couponId,
+        amountMillimes,
+        status: PaymentStatus.PENDING,
+      },
     });
 
     const { paymentId, link } = await this.flouci.generatePayment({
@@ -140,7 +154,7 @@ export class PaymentsService {
   async createSessionPayment(userId: string, availabilityId: string) {
     const slot = await this.prisma.sessionAvailability.findUnique({
       where: { id: availabilityId },
-      select: { id: true, price: true, isBooked: true, title: true },
+      select: { id: true, price: true, isBooked: true, title: true, instructorId: true },
     });
     if (!slot) {
       throw new NotFoundException('Availability slot not found');
@@ -154,7 +168,13 @@ export class PaymentsService {
 
     const amountMillimes = Math.round(slot.price * 1000);
     const payment = await this.prisma.payment.create({
-      data: { userId, availabilityId, amountMillimes, status: PaymentStatus.PENDING },
+      data: {
+        userId,
+        availabilityId,
+        instructorId: slot.instructorId,
+        amountMillimes,
+        status: PaymentStatus.PENDING,
+      },
     });
 
     const { paymentId, link } = await this.flouci.generatePayment({
@@ -196,9 +216,12 @@ export class PaymentsService {
     const result = await this.flouci.verifyPayment(payment.providerPaymentId);
 
     if (result.success && result.status === 'SUCCESS') {
-      // Revenue split: platform keeps PLATFORM_FEE_PERCENT (default 30%),
-      // the instructor earns the rest — regardless of the price they set.
-      const feePercent = Number(this.config.get<string>('PLATFORM_FEE_PERCENT', '30'));
+      // Revenue split: courses keep PLATFORM_FEE_PERCENT (30%), live sessions
+      // keep SESSION_FEE_PERCENT (20%). The instructor earns the rest — and for
+      // a group session each student's payment is cut individually.
+      const feePercent = payment.availabilityId
+        ? Number(this.config.get<string>('SESSION_FEE_PERCENT', '20'))
+        : Number(this.config.get<string>('PLATFORM_FEE_PERCENT', '30'));
       const platformFeeMillimes = Math.round((payment.amountMillimes * feePercent) / 100);
       const instructorNetMillimes = payment.amountMillimes - platformFeeMillimes;
       await this.prisma.payment.update({
@@ -352,10 +375,10 @@ export class PaymentsService {
     return this.prisma.coupon.update({ where: { id: couponId }, data: { active: false } });
   }
 
-  /** Earnings summary for an instructor: 70% share of every PAID sale on their courses. */
+  /** Earnings for an instructor: their share of every PAID course sale + live session. */
   async getInstructorEarnings(instructorId: string) {
     const payments = await this.prisma.payment.findMany({
-      where: { status: PaymentStatus.PAID, course: { instructorId } },
+      where: { status: PaymentStatus.PAID, instructorId },
       select: {
         id: true,
         amountMillimes: true,
@@ -423,64 +446,57 @@ export class PaymentsService {
   async getMonthlyPayouts(month: string) {
     const { start, end, key } = monthRange(month);
 
+    // All PAID payments this month attributed to an instructor (courses + sessions).
     const payments = await this.prisma.payment.findMany({
       where: {
         status: PaymentStatus.PAID,
         createdAt: { gte: start, lt: end },
-        course: { instructorId: { not: null } },
+        instructorId: { not: null },
       },
-      select: {
-        instructorNetMillimes: true,
-        course: {
-          select: {
-            instructor: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-                payoutMethod: true,
-                bankName: true,
-                bankRib: true,
-                bankAccountHolder: true,
-                flouciNumber: true,
-              },
-            },
-          },
-        },
-      },
+      select: { instructorId: true, instructorNetMillimes: true },
     });
 
-    const byInstructor = new Map<
-      string,
-      { instructor: NonNullable<NonNullable<(typeof payments)[number]['course']>['instructor']>; earnedMillimes: number; sales: number }
-    >();
+    const totals = new Map<string, { earnedMillimes: number; sales: number }>();
     for (const p of payments) {
-      const ins = p.course?.instructor;
-      if (!ins) continue;
-      const entry = byInstructor.get(ins.id) ?? { instructor: ins, earnedMillimes: 0, sales: 0 };
+      if (!p.instructorId) continue;
+      const entry = totals.get(p.instructorId) ?? { earnedMillimes: 0, sales: 0 };
       entry.earnedMillimes += p.instructorNetMillimes;
       entry.sales += 1;
-      byInstructor.set(ins.id, entry);
+      totals.set(p.instructorId, entry);
     }
 
+    const instructors = await this.prisma.user.findMany({
+      where: { id: { in: Array.from(totals.keys()) } },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        payoutMethod: true,
+        bankName: true,
+        bankRib: true,
+        bankAccountHolder: true,
+        flouciNumber: true,
+      },
+    });
     const payouts = await this.prisma.payout.findMany({ where: { month: key } });
     const paidBy = new Map(payouts.map((p) => [p.instructorId, p]));
 
     return {
       month: key,
-      instructors: Array.from(byInstructor.values())
-        .map((e) => ({
-          instructor: e.instructor,
-          earnedMillimes: e.earnedMillimes,
-          sales: e.sales,
-          paid: paidBy.has(e.instructor.id),
-          paidAt: paidBy.get(e.instructor.id)?.paidAt ?? null,
-          hasPayoutDetails: Boolean(
-            e.instructor.payoutMethod === 'flouci'
-              ? e.instructor.flouciNumber
-              : e.instructor.bankRib,
-          ),
-        }))
+      instructors: instructors
+        .map((ins) => {
+          const t = totals.get(ins.id) ?? { earnedMillimes: 0, sales: 0 };
+          return {
+            instructor: ins,
+            earnedMillimes: t.earnedMillimes,
+            sales: t.sales,
+            paid: paidBy.has(ins.id),
+            paidAt: paidBy.get(ins.id)?.paidAt ?? null,
+            hasPayoutDetails: Boolean(
+              ins.payoutMethod === 'flouci' ? ins.flouciNumber : ins.bankRib,
+            ),
+          };
+        })
         .sort((a, b) => b.earnedMillimes - a.earnedMillimes),
     };
   }
@@ -499,7 +515,7 @@ export class PaymentsService {
       where: {
         status: PaymentStatus.PAID,
         createdAt: { gte: start, lt: end },
-        course: { instructorId },
+        instructorId,
       },
       _sum: { instructorNetMillimes: true },
     });

@@ -10,6 +10,7 @@ import {
   PlayCircle,
   Star,
   User,
+  Video,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -84,6 +85,7 @@ type Course = {
   instrument: string;
   level: string;
   price: number | null;
+  includedLiveSessions?: number;
   thumbnailUrl?: string | null;
   isPublished: boolean;
   createdAt: string;
@@ -376,6 +378,13 @@ function CourseDetailPage() {
                 <PlayCircle className="h-4 w-4" />
                 {totalLessons} lessons
               </span>
+              {course.includedLiveSessions && course.includedLiveSessions > 0 ? (
+                <span className="inline-flex items-center gap-1.5 font-medium text-primary">
+                  <Video className="h-4 w-4" />
+                  {course.includedLiveSessions} live{" "}
+                  {course.includedLiveSessions === 1 ? "session" : "sessions"} included
+                </span>
+              ) : null}
               <span className="inline-flex items-center gap-1.5">
                 <Clock3 className="h-4 w-4" />
                 Updated {new Date(course.updatedAt).toLocaleDateString()}

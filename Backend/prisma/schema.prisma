@@ -201,6 +201,7 @@ model Course {
   whatYouWillLearn String[]  @default([])
   requirements String[]      @default([])
   tags         String[]      @default([])
+  includedLiveSessions Int @default(0)
   isPublished  Boolean      @default(false)
   approvalStatus CourseApprovalStatus @default(PENDING)
   approvedById String?
@@ -236,6 +237,7 @@ model Payment {
   // Exactly one of courseId / availabilityId is set (course purchase vs session booking).
   courseId          String?
   availabilityId    String?
+  instructorId      String?
   couponId          String?
   provider          String        @default("flouci")
   providerPaymentId String?       @unique
@@ -254,6 +256,7 @@ model Payment {
 
   @@index([userId])
   @@index([courseId])
+  @@index([instructorId])
 }
 
 model Coupon {

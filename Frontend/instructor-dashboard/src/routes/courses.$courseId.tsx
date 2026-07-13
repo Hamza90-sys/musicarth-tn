@@ -37,6 +37,7 @@ type Course = {
   instrument: string;
   level: string;
   price: number | null;
+  includedLiveSessions?: number;
   isPublished: boolean;
   approvalStatus?: "PENDING" | "APPROVED" | "REJECTED";
   thumbnailUrl?: string | null;
@@ -121,6 +122,7 @@ function ManageCoursePage() {
     instrument: "piano",
     level: "beginner",
     price: "0",
+    includedLiveSessions: "0",
     whatYouWillLearn: "",
     requirements: "",
     tags: "",
@@ -143,6 +145,7 @@ function ManageCoursePage() {
       instrument: course.instrument,
       level: course.level,
       price: course.price != null ? String(course.price) : "0",
+      includedLiveSessions: String(course.includedLiveSessions ?? 0),
       whatYouWillLearn: (course.whatYouWillLearn ?? []).join("\n"),
       requirements: (course.requirements ?? []).join("\n"),
       tags: (course.tags ?? []).join(", "),
@@ -163,6 +166,7 @@ function ManageCoursePage() {
           instrument: details.instrument,
           level: details.level,
           price: Number(details.price) || 0,
+          includedLiveSessions: Number(details.includedLiveSessions) || 0,
           whatYouWillLearn: toLines(details.whatYouWillLearn),
           requirements: toLines(details.requirements),
           tags: toList(details.tags),
@@ -466,6 +470,13 @@ function ManageCoursePage() {
             <div className="space-y-1.5">
               <Label htmlFor="d-price">Price (TND)</Label>
               <Input id="d-price" type="number" min="0" value={details.price} onChange={(e) => setField("price", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="d-sessions">Included live sessions</Label>
+              <Input id="d-sessions" type="number" min="0" max="50" value={details.includedLiveSessions} onChange={(e) => setField("includedLiveSessions", e.target.value)} />
+              <p className="text-xs text-muted-foreground">
+                Live 1:1/group sessions you’ll give students who buy this course (0 = none). Standalone paid sessions are separate.
+              </p>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
