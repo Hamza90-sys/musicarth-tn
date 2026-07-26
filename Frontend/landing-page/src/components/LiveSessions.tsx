@@ -1,7 +1,9 @@
 import { motion } from "motion/react";
 import guitar from "@/assets/Guitar1.png";
+import { useI18n } from "@/lib/i18n";
 
 export function LiveSessions() {
+  const { t } = useI18n();
   return (
     <section id="live" className="relative overflow-hidden py-32">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-surface to-white" />
@@ -29,13 +31,13 @@ export function LiveSessions() {
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           >
             <span className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur px-3 py-1 text-xs text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Live Sessions
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> {t("liveKicker")}
             </span>
             <h2 className="mt-5 font-display text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1] tracking-[-0.03em]">
-              Play together,<br /><span className="italic text-gradient-primary">in real time.</span>
+              {t("liveTitle1")}<br /><span className="italic text-gradient-primary">{t("liveTitle2")}</span>
             </h2>
             <p className="mt-5 text-muted-foreground text-lg max-w-md">
-              Weekly live cohorts and masterclasses with world-class instructors. Real feedback, real rhythm.
+              {t("liveSub")}
             </p>
 
             <div className="mt-8">
@@ -49,9 +51,9 @@ export function LiveSessions() {
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                 </div>
-                <div className="mt-4 font-medium text-foreground">No live sessions scheduled yet</div>
+                <div className="mt-4 font-medium text-foreground">{t("liveEmptyTitle")}</div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  We're lining up our first live cohorts and masterclasses. Check back soon.
+                  {t("liveEmptyBody")}
                 </p>
               </motion.div>
             </div>

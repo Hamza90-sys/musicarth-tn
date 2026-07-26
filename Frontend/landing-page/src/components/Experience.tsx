@@ -1,14 +1,16 @@
 import { motion } from "motion/react";
 import saxophone from "@/assets/saxophone.png";
+import { useI18n, type TKey } from "@/lib/i18n";
 
-const features = [
-  { title: "Personalized Path", desc: "Adaptive curriculum that responds to how you play and grow.", icon: "M12 2v20M2 12h20" },
-  { title: "Progress Tracking", desc: "Beautiful weekly insights, milestones, and listening rooms.", icon: "M3 3v18h18M7 14l4-4 4 4 6-6" },
-  { title: "Recognized Certificates", desc: "Conservatory-grade certifications recognized by partners.", icon: "M12 2l3 7h7l-5.5 4 2 7-6.5-4-6.5 4 2-7L2 9h7z" },
-  { title: "Living Community", desc: "A place to share, collaborate, and perform with peers.", icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" },
+const features: Array<{ title: TKey; desc: TKey; icon: string }> = [
+  { title: "expFeat1Title", desc: "expFeat1Desc", icon: "M12 2v20M2 12h20" },
+  { title: "expFeat2Title", desc: "expFeat2Desc", icon: "M3 3v18h18M7 14l4-4 4 4 6-6" },
+  { title: "expFeat3Title", desc: "expFeat3Desc", icon: "M12 2l3 7h7l-5.5 4 2 7-6.5-4-6.5 4 2-7L2 9h7z" },
+  { title: "expFeat4Title", desc: "expFeat4Desc", icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" },
 ];
 
 export function Experience() {
+  const { t } = useI18n();
   return (
     <section id="experience" className="relative overflow-hidden py-32 bg-white">
       <motion.img
@@ -35,13 +37,13 @@ export function Experience() {
           className="max-w-2xl"
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-xs text-primary">
-            <span className="h-1 w-1 rounded-full bg-primary" /> Learning Experience
+            <span className="h-1 w-1 rounded-full bg-primary" /> {t("expKicker")}
           </span>
           <h2 className="mt-5 font-display text-[clamp(2.5rem,5vw,4.5rem)] leading-[1] tracking-[-0.03em]">
-            Designed like a <span className="italic text-gradient-primary">composition.</span>
+            {t("expTitle1")} <span className="italic text-gradient-primary">{t("expTitle2")}</span>
           </h2>
           <p className="mt-5 text-muted-foreground text-lg">
-            Every detail of Musicarth is orchestrated — from your first lesson to your first standing ovation.
+            {t("expSub")}
           </p>
         </motion.div>
 
@@ -60,8 +62,8 @@ export function Experience() {
                   <path d={f.icon} />
                 </svg>
               </div>
-              <h3 className="mt-5 font-display text-xl tracking-tight">{f.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              <h3 className="mt-5 font-display text-xl tracking-tight">{t(f.title)}</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{t(f.desc)}</p>
             </motion.div>
           ))}
         </div>

@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 
 type FeaturedInstructor = {
   id: string;
@@ -28,6 +29,7 @@ const initials = (name: string) =>
     .join("") || "?";
 
 export function Instructors() {
+  const { t } = useI18n();
   const { data } = useQuery({ queryKey: ["featured-instructors"], queryFn: fetchInstructors });
 
   const people = data ?? [];
@@ -47,17 +49,17 @@ export function Instructors() {
             className="max-w-2xl"
           >
             <span className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur px-3 py-1 text-xs text-primary">
-              <span className="h-1 w-1 rounded-full bg-primary" /> Instructors
+              <span className="h-1 w-1 rounded-full bg-primary" /> {t("instKicker")}
             </span>
             <h2 className="mt-5 font-display text-[clamp(2.5rem,5vw,4.5rem)] leading-[1] tracking-[-0.03em]">
-              Learn from the <span className="italic text-gradient-primary">orchestra.</span>
+              {t("instTitle1")} <span className="italic text-gradient-primary">{t("instTitle2")}</span>
             </h2>
           </motion.div>
           <a
             href="/courses"
             className="text-sm text-primary inline-flex items-center gap-1 hover:gap-2 transition-all"
           >
-            Explore their courses
+            {t("instExplore")}
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M13 5l7 7-7 7" />
             </svg>
@@ -98,8 +100,8 @@ export function Instructors() {
               <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
                 <div className="font-display text-xl tracking-tight">{p.fullName}</div>
                 <div className="mt-1 flex items-center justify-between gap-2 text-xs text-white/70">
-                  <span className="truncate capitalize">{p.headline ?? p.instrument ?? "Instructor"}</span>
-                  {p.students > 0 ? <span className="shrink-0">{p.students} students</span> : null}
+                  <span className="truncate capitalize">{p.headline ?? p.instrument ?? t("instRole")}</span>
+                  {p.students > 0 ? <span className="shrink-0">{p.students} {t("students")}</span> : null}
                 </div>
               </div>
             </motion.article>

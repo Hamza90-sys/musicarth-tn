@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 
 type PlatformReview = {
   id: string;
@@ -24,6 +25,7 @@ const fetchReviews = async (): Promise<ReviewsResponse> => {
  * server-side minimum (15) students have rated the platform.
  */
 export function Testimonials() {
+  const { t } = useI18n();
   const { data } = useQuery({ queryKey: ["platform-reviews"], queryFn: fetchReviews });
 
   const items = data?.items ?? [];
@@ -43,10 +45,10 @@ export function Testimonials() {
           className="max-w-2xl"
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-xs text-primary">
-            <span className="h-1 w-1 rounded-full bg-primary" /> Testimonials
+            <span className="h-1 w-1 rounded-full bg-primary" /> {t("testKicker")}
           </span>
           <h2 className="mt-5 font-display text-[clamp(2.5rem,5vw,4.5rem)] leading-[1] tracking-[-0.03em]">
-            Voices from the <span className="italic text-gradient-primary">stage.</span>
+            {t("testTitle1")} <span className="italic text-gradient-primary">{t("testTitle2")}</span>
           </h2>
         </motion.div>
       </div>

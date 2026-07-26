@@ -1,38 +1,37 @@
-import { useI18n, type Lang } from "@/lib/i18n";
+import { useI18n, type Lang, type TKey } from "@/lib/i18n";
 
 const LANGS: Array<{ code: Lang; label: string }> = [
   { code: "en", label: "English" },
   { code: "fr", label: "Français" },
-  { code: "ar", label: "العربية" },
 ];
 
 export function Footer() {
-  const { lang, setLang } = useI18n();
-  const cols = [
+  const { lang, setLang, t } = useI18n();
+  const cols: Array<{ title: TKey; items: Array<{ label: TKey; href: string }> }> = [
     {
-      title: "Platform",
+      title: "footerColPlatform",
       items: [
-        { label: "Courses", href: "#courses" },
-        { label: "Live", href: "#live" },
-        { label: "Instructors", href: "#instructors" },
-        { label: "Pricing", href: "#pricing" },
+        { label: "navCourses", href: "#courses" },
+        { label: "navLive", href: "#live" },
+        { label: "navInstructors", href: "#instructors" },
+        { label: "navPricing", href: "#pricing" },
       ],
     },
     {
-      title: "Company",
+      title: "footerColCompany",
       items: [
-        { label: "About", href: "/about" },
-        { label: "Careers", href: "/apply/instructor" },
-        { label: "Privacy", href: "/privacy" },
-        { label: "Terms", href: "/terms" },
+        { label: "footAbout", href: "/about" },
+        { label: "footCareers", href: "/apply/instructor" },
+        { label: "footPrivacy", href: "/privacy" },
+        { label: "footTerms", href: "/terms" },
       ],
     },
     {
-      title: "Contact",
+      title: "footerColContact",
       items: [
-        { label: "Email us", href: "mailto:musicarthtn@gmail.com" },
-        { label: "Become an instructor", href: "/apply/instructor" },
-        { label: "Join as a student", href: "/apply/student" },
+        { label: "footEmailUs", href: "mailto:musicarthtn@gmail.com" },
+        { label: "footBecomeInstructor", href: "/apply/instructor" },
+        { label: "footJoinStudent", href: "/apply/student" },
       ],
     },
   ];
@@ -57,7 +56,7 @@ export function Footer() {
             </div>
 
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-600">
-              A modern, immersive platform for learning music with world-class instructors and cinematic experiences.
+              {t("footerTagline")}
             </p>
 
             <div className="mt-6 flex items-center gap-3">
@@ -81,7 +80,7 @@ export function Footer() {
 
           {cols.map((c) => (
             <div key={c.title}>
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{c.title}</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t(c.title)}</div>
               <ul className="mt-5 space-y-3 text-sm">
                 {c.items.map((it) => (
                   <li key={it.label}>
@@ -89,7 +88,7 @@ export function Footer() {
                       href={it.href}
                       className="text-slate-700 transition-colors hover:text-slate-950"
                     >
-                      {it.label}
+                      {t(it.label)}
                     </a>
                   </li>
                 ))}
@@ -99,7 +98,7 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-violet-200/80 pt-6">
-          <div className="text-xs text-slate-500">© {new Date().getFullYear()} Musicarth. Composed with care.</div>
+          <div className="text-xs text-slate-500">© {new Date().getFullYear()} Musicarth. {t("footerRights")}</div>
           <div className="flex items-center gap-4 text-xs text-slate-700">
             <div className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white p-1 shadow-sm">
               {LANGS.map((l) => (
@@ -118,10 +117,10 @@ export function Footer() {
               ))}
             </div>
             <a href="/privacy" className="hover:text-slate-950">
-              Privacy
+              {t("footPrivacy")}
             </a>
             <a href="/terms" className="hover:text-slate-950">
-              Terms
+              {t("footTerms")}
             </a>
           </div>
         </div>

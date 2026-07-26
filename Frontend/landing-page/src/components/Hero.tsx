@@ -39,7 +39,7 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
             </span>
-            Live cohort opens this season
+            {t("heroBadge")}
           </motion.div>
 
           <motion.h1
@@ -81,7 +81,7 @@ export function Hero() {
               to="/apply/instructor"
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-6 py-3.5 text-sm font-medium text-white transition-all backdrop-blur-md hover:bg-white/20"
             >
-              Become Instructor
+              {t("becomeInstructor")}
             </Link>
           </motion.div>
 
@@ -92,18 +92,18 @@ export function Hero() {
             className="mt-12 flex items-center gap-8 text-xs text-white/70"
           >
             <div>
-              <div className="text-2xl font-display text-white">120k+</div>
-              <div className="mt-1">Students worldwide</div>
+              <div className="text-2xl font-display text-white">{t("heroStat1Big")}</div>
+              <div className="mt-1">{t("heroStat1Sub")}</div>
             </div>
             <div className="h-10 w-px bg-white/20" />
             <div>
-              <div className="text-2xl font-display text-white">4.9*</div>
-              <div className="mt-1">Average rating</div>
+              <div className="text-2xl font-display text-white">{t("heroStat2Big")}</div>
+              <div className="mt-1">{t("heroStat2Sub")}</div>
             </div>
             <div className="hidden h-10 w-px bg-white/20 sm:block" />
             <div className="hidden sm:block">
-              <div className="text-2xl font-display text-white">200+</div>
-              <div className="mt-1">Master instructors</div>
+              <div className="text-2xl font-display text-white">{t("heroStat3Big")}</div>
+              <div className="mt-1">{t("heroStat3Sub")}</div>
             </div>
           </motion.div>
         </motion.div>

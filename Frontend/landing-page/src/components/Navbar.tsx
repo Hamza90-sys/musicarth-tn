@@ -11,7 +11,7 @@ const links: Array<{ key: "navCourses" | "navExperience" | "navLive" | "navInstr
   { key: "navPricing", href: "/#pricing" },
 ];
 
-const LANGS: Lang[] = ["en", "fr", "ar"];
+const LANGS: Lang[] = ["en", "fr"];
 
 export function Navbar() {
   const { t, lang, setLang } = useI18n();

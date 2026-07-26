@@ -7,61 +7,35 @@ import guitar from "@/assets/guitar.png";
 import violin from "@/assets/violin.png";
 import drums from "@/assets/drums.png";
 import oud from "@/assets/oud.png";
+import { useI18n, type TKey } from "@/lib/i18n";
 
-const courses = [
-  {
-    id: 0,
-    label: "Course 01",
-    title: "Piano Foundations",
-    instrument: "piano",
-    desc: "Build a cinematic relationship with the keys — from your first chord to expressive performance.",
-    meta: ["12 weeks", "48 lessons", "Beginner → Intermediate"],
-    image: piano,
-    accent: "from-primary/40 to-primary-light/30",
-  },
-  {
-    id: 1,
-    label: "Course 02",
-    title: "Acoustic Guitar Craft",
-    instrument: "guitar",
-    desc: "Learn the warmth, rhythm, and storytelling of acoustic guitar through classic and modern repertoire.",
-    meta: ["10 weeks", "36 lessons", "All levels"],
-    image: guitar,
-    accent: "from-amber-300/30 to-primary/30",
-  },
-  {
-    id: 2,
-    label: "Course 03",
-    title: "Violin Mastery",
-    instrument: "violin",
-    desc: "Refine tone, vibrato, and bow control with conservatory-grade technique and orchestral pieces.",
-    meta: ["16 weeks", "60 lessons", "Intermediate"],
-    image: violin,
-    accent: "from-rose-300/30 to-primary/30",
-  },
-  {
-    id: 3,
-    label: "Course 04",
-    title: "Rhythm & Drums",
-    instrument: "drums",
-    desc: "Lock into the groove — develop pocket, dynamics, and the language of modern drumming.",
-    meta: ["8 weeks", "32 lessons", "Beginner"],
-    image: drums,
-    accent: "from-primary/40 to-fuchsia-300/30",
-  },
-  {
-    id: 4,
-    label: "Course 05",
-    title: "Oud & Maqam",
-    instrument: "oud",
-    desc: "Explore the soul of Arabic music — master the oud, its ornaments, and the language of maqam.",
-    meta: ["12 weeks", "40 lessons", "All levels"],
-    image: oud,
-    accent: "from-amber-400/30 to-primary/30",
-  },
+const courses: Array<{
+  id: number;
+  num: number;
+  titleKey: TKey;
+  descKey: TKey;
+  instrument: string;
+  weeks: number;
+  lessons: number;
+  levelKey: TKey;
+  image: string;
+  accent: string;
+}> = [
+  { id: 0, num: 1, titleKey: "csPianoTitle", descKey: "csPianoDesc", instrument: "piano", weeks: 12, lessons: 48, levelKey: "levelBegInt", image: piano, accent: "from-primary/40 to-primary-light/30" },
+  { id: 1, num: 2, titleKey: "csGuitarTitle", descKey: "csGuitarDesc", instrument: "guitar", weeks: 10, lessons: 36, levelKey: "levelAll", image: guitar, accent: "from-amber-300/30 to-primary/30" },
+  { id: 2, num: 3, titleKey: "csViolinTitle", descKey: "csViolinDesc", instrument: "violin", weeks: 16, lessons: 60, levelKey: "levelIntermediate", image: violin, accent: "from-rose-300/30 to-primary/30" },
+  { id: 3, num: 4, titleKey: "csDrumsTitle", descKey: "csDrumsDesc", instrument: "drums", weeks: 8, lessons: 32, levelKey: "levelBeginner", image: drums, accent: "from-primary/40 to-fuchsia-300/30" },
+  { id: 4, num: 5, titleKey: "csOudTitle", descKey: "csOudDesc", instrument: "oud", weeks: 12, lessons: 40, levelKey: "levelAll", image: oud, accent: "from-amber-400/30 to-primary/30" },
 ];
 
 export function CoursesStory() {
+  const { t } = useI18n();
+  const label = (num: number) => `${t("csCourseWord")} ${String(num).padStart(2, "0")}`;
+  const meta = (c: (typeof courses)[number]) => [
+    `${c.weeks} ${t("csWeeks")}`,
+    `${c.lessons} ${t("lessonsWord")}`,
+    t(c.levelKey),
+  ];
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
@@ -87,13 +61,13 @@ export function CoursesStory() {
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-xs text-primary">
-            <span className="h-1 w-1 rounded-full bg-primary" /> Featured Courses
+            <span className="h-1 w-1 rounded-full bg-primary" /> {t("csKicker")}
           </span>
           <h2 className="mt-5 font-display text-[clamp(2.5rem,5vw,4.5rem)] leading-[1] tracking-[-0.03em] max-w-3xl">
-            A journey through <span className="italic text-gradient-primary">every instrument</span>.
+            {t("csTitle1")} <span className="italic text-gradient-primary">{t("csTitle2")}</span>.
           </h2>
           <p className="mt-5 max-w-xl text-muted-foreground text-lg">
-            Scroll to explore. Each course is composed like a piece of music — guided, intentional, alive.
+            {t("csSub")}
           </p>
         </motion.div>
       </div>
@@ -132,7 +106,7 @@ export function CoursesStory() {
 
                   <motion.img
                     src={courses[active].image}
-                    alt={courses[active].title}
+                    alt={t(courses[active].titleKey)}
                     style={{ rotate }}
                     width={1280}
                     height={1280}
@@ -142,7 +116,7 @@ export function CoursesStory() {
 
                   {/* Badge */}
                   <div className="absolute top-8 left-4 sm:left-12 glass rounded-full px-3 py-1.5 text-xs text-foreground/80">
-                    {courses[active].label}
+                    {label(courses[active].num)}
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -163,18 +137,18 @@ export function CoursesStory() {
                         className="absolute inset-0 rounded-3xl p-6 sm:p-7 border bg-white border-primary/20 shadow-[0_30px_80px_-30px_oklch(0.55_0.25_293/0.45)]"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{c.label}</span>
+                          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label(c.num)}</span>
                           <span className="text-xs text-primary flex items-center gap-1.5">
                             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                            Now playing
+                            {t("csNowPlaying")}
                           </span>
                         </div>
                         <h3 className="mt-3 font-display text-2xl sm:text-3xl tracking-tight text-foreground">
-                          {c.title}
+                          {t(c.titleKey)}
                         </h3>
-                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
+                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{t(c.descKey)}</p>
                         <div className="mt-4 flex flex-wrap gap-1.5">
-                          {c.meta.map((m) => (
+                          {meta(c).map((m) => (
                             <span key={m} className="text-[11px] rounded-full bg-surface px-2.5 py-1 text-foreground/70">
                               {m}
                             </span>
@@ -185,7 +159,7 @@ export function CoursesStory() {
                           search={{ instrument: c.instrument }}
                           className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02]"
                         >
-                          Explore {c.instrument} courses
+                          {t("csExplore")}
                           <ArrowRight className="h-4 w-4" />
                         </Link>
                       </motion.div>
