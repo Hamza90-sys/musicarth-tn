@@ -22,7 +22,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-center blur-[1px] brightness-[0.82] contrast-105 saturate-90"
+        className="absolute inset-0 h-full w-full object-contain object-center brightness-[0.82] contrast-105 saturate-90"
       />
 
       <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(3,7,18,0.78)_0%,rgba(3,7,18,0.56)_34%,rgba(3,7,18,0.22)_62%,rgba(3,7,18,0.08)_100%)]" />
