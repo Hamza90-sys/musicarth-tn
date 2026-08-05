@@ -11,7 +11,7 @@ export function Hero() {
   const textY = useTransform(scrollYProgress, [0, 1], [0, 80]);
 
   return (
-    <section ref={ref} className="relative overflow-hidden bg-black pt-28 pb-16 md:min-h-[100vh] md:pt-32 md:pb-24">
+    <section ref={ref} className="relative overflow-hidden bg-black pt-24 pb-10 md:min-h-[100vh] md:pt-32 md:pb-24">
       {/* Full-bleed background video. On mobile it frames the right side of the
           footage; on md+ it's centered. */}
       <motion.video
