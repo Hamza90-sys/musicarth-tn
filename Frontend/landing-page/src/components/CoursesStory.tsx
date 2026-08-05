@@ -53,7 +53,7 @@ export function CoursesStory() {
   return (
     <section id="courses" className="relative bg-white">
       {/* Section header */}
-      <div className="mx-auto max-w-[1280px] px-6 pt-32 pb-16">
+      <div className="mx-auto max-w-[1280px] px-6 pt-12 pb-10 md:pt-32 md:pb-16">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
