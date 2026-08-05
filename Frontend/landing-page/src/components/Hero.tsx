@@ -11,7 +11,8 @@ export function Hero() {
   const textY = useTransform(scrollYProgress, [0, 1], [0, 80]);
 
   return (
-    <section ref={ref} className="relative min-h-[100vh] overflow-hidden bg-black pt-32 pb-24">
+    <section ref={ref} className="relative overflow-hidden bg-black pt-24 pb-16 md:min-h-[100vh] md:pt-32 md:pb-24">
+      {/* Desktop: full-bleed background video + readability gradient (md and up only) */}
       <motion.video
         src={heroVideo}
         autoPlay
@@ -22,12 +23,25 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-0 h-full w-full object-contain md:object-cover object-center"
+        className="absolute inset-0 hidden h-full w-full object-cover object-center md:block"
       />
-
-      <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(3,7,18,0.78)_0%,rgba(3,7,18,0.56)_34%,rgba(3,7,18,0.22)_62%,rgba(3,7,18,0.08)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 z-10 hidden bg-[linear-gradient(90deg,rgba(3,7,18,0.78)_0%,rgba(3,7,18,0.56)_34%,rgba(3,7,18,0.22)_62%,rgba(3,7,18,0.08)_100%)] md:block" />
 
       <div className="relative z-20 mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-6 lg:grid-cols-12">
+        {/* Mobile: video in its own 16:9 block — whole frame, no crop, no dark space */}
+        <motion.video
+          src={heroVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+          className="aspect-video w-full rounded-2xl object-cover shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] md:hidden"
+        />
+
         <motion.div style={{ y: textY }} className="relative z-20 lg:col-span-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
