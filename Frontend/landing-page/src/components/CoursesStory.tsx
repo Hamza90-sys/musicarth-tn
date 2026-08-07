@@ -52,6 +52,13 @@ export function CoursesStory() {
 
   return (
     <section id="courses" className="relative bg-white">
+      {/* Preload every instrument image so the scroll swaps are instant (no pop-in). */}
+      <div aria-hidden className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0">
+        {courses.map((c) => (
+          <img key={c.id} src={c.image} alt="" width={1} height={1} decoding="async" />
+        ))}
+      </div>
+
       {/* Section header */}
       <div className="mx-auto max-w-[1280px] px-6 pt-12 pb-10 md:pt-32 md:pb-16">
         <motion.div
@@ -92,13 +99,13 @@ export function CoursesStory() {
           <div className="mx-auto grid max-w-[1280px] h-full grid-cols-1 lg:grid-cols-12 items-center gap-8 px-6">
             {/* Sticky instrument */}
             <div className="lg:col-span-7 relative h-[50vh] lg:h-full">
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 <motion.div
                   key={courses[active].id}
                   initial={{ opacity: 0, x: -120, rotate: -12, scale: 0.92 }}
                   animate={{ opacity: 1, x: 0, rotate: 0, scale: 1 }}
                   exit={{ opacity: 0, x: 120, rotate: 12, scale: 0.92 }}
-                  transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   className="absolute inset-0 flex items-center justify-center"
                 >
                   {/* Glow halo */}
@@ -110,7 +117,8 @@ export function CoursesStory() {
                     style={{ rotate }}
                     width={1280}
                     height={1280}
-                    loading="lazy"
+                    loading="eager"
+                    decoding="async"
                     className="relative w-[420px] sm:w-[580px] lg:w-[720px] max-w-none animate-float-slow drop-shadow-[0_40px_50px_oklch(0.3_0.15_295/0.35)]"
                   />
 
