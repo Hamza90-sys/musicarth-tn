@@ -71,7 +71,7 @@ export class PaymentsController {
 
   @Post('coupons')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async createCoupon(
     @Body() dto: CreateCouponDto,
     @CurrentUser() user: { sub: string; role: string },
@@ -81,14 +81,14 @@ export class PaymentsController {
 
   @Get('coupons/mine')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async myCoupons(@CurrentUser() user: { sub: string }) {
     return this.paymentsService.listMyCoupons(user.sub);
   }
 
   @Delete('coupons/:couponId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async deactivateCoupon(
     @Param('couponId') couponId: string,
     @CurrentUser() user: { sub: string; role: string },

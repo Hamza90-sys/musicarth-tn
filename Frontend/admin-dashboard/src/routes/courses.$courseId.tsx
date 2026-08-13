@@ -64,6 +64,15 @@ type Course = {
   instructor?: { id: string; fullName: string } | null;
   sections: Section[];
 };
+type Coupon = {
+  id: string;
+  code: string;
+  percentOff: number;
+  courseId: string | null;
+  maxUses: number | null;
+  uses: number;
+  active: boolean;
+};
 
 const statusBadge = (s?: Lesson["videoStatus"]) => {
   if (s === "READY") return { label: "Ready", variant: "default" as const };
@@ -132,6 +141,7 @@ function ManageCoursePage() {
   const thumbRef = useRef<HTMLInputElement>(null);
   const [sectionTitle, setSectionTitle] = useState("");
   const [lessonTitle, setLessonTitle] = useState<Record<string, string>>({});
+  const [couponForm, setCouponForm] = useState({ code: "", percentOff: "20", maxUses: "" });
   const [details, setDetails] = useState({
     title: "",
     subtitle: "",
@@ -217,6 +227,38 @@ function ManageCoursePage() {
       await refresh();
     },
     onError: (e) => toast.error(e instanceof ApiError ? e.message : "Could not assign instructor"),
+  });
+
+  // Discount codes for this course. Admin-created coupons are always
+  // course-specific so they apply regardless of which instructor owns it.
+  const couponsQuery = useQuery({
+    queryKey: ["admin-coupons"],
+    queryFn: () => apiFetch<Coupon[]>("/payments/coupons/mine"),
+  });
+  const courseCoupons = (couponsQuery.data ?? []).filter((c) => c.courseId === courseId);
+  const createCoupon = useMutation({
+    mutationFn: () =>
+      apiFetch("/payments/coupons", {
+        method: "POST",
+        body: JSON.stringify({
+          code: couponForm.code.trim(),
+          percentOff: Number(couponForm.percentOff),
+          courseId,
+          ...(couponForm.maxUses ? { maxUses: Number(couponForm.maxUses) } : {}),
+        }),
+      }),
+    onSuccess: async () => {
+      toast.success("Coupon created");
+      setCouponForm({ code: "", percentOff: "20", maxUses: "" });
+      await queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : "Could not create coupon"),
+  });
+  const deactivateCoupon = useMutation({
+    mutationFn: (id: string) => apiFetch("/payments/coupons/" + id, { method: "DELETE" }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });
+    },
   });
 
   // Poll Mux for a lesson's transcoding status (webhooks don't reach localhost).
@@ -588,6 +630,86 @@ function ManageCoursePage() {
               onChange={(e) => onPickThumbnail(e.target.files?.[0] ?? null)}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/60 shadow-soft">
+        <CardHeader>
+          <CardTitle className="text-base">Coupons</CardTitle>
+          <CardDescription>
+            Discount codes for this course. Students enter the code at checkout.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="space-y-1">
+              <Label htmlFor="cc-code" className="text-xs">Code</Label>
+              <Input
+                id="cc-code"
+                value={couponForm.code}
+                onChange={(e) => setCouponForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
+                placeholder="LAUNCH20"
+                className="h-9 w-36 uppercase"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="cc-pct" className="text-xs">% off</Label>
+              <Input
+                id="cc-pct"
+                type="number"
+                min="1"
+                max="100"
+                value={couponForm.percentOff}
+                onChange={(e) => setCouponForm((f) => ({ ...f, percentOff: e.target.value }))}
+                className="h-9 w-20"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="cc-max" className="text-xs">Max uses (optional)</Label>
+              <Input
+                id="cc-max"
+                type="number"
+                min="1"
+                value={couponForm.maxUses}
+                onChange={(e) => setCouponForm((f) => ({ ...f, maxUses: e.target.value }))}
+                className="h-9 w-28"
+              />
+            </div>
+            <Button
+              size="sm"
+              className="h-9"
+              disabled={!couponForm.code.trim() || createCoupon.isPending}
+              onClick={() => createCoupon.mutate()}
+            >
+              {createCoupon.isPending ? "Creating…" : "Create coupon"}
+            </Button>
+          </div>
+          {courseCoupons.length > 0 ? (
+            <div className="space-y-1.5">
+              {courseCoupons.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2 text-sm"
+                >
+                  <span className="font-mono font-semibold">{c.code}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {c.percentOff}% off · used {c.uses}{c.maxUses ? "/" + c.maxUses : ""}
+                    {c.active ? "" : " · inactive"}
+                  </span>
+                  {c.active ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-destructive"
+                      onClick={() => deactivateCoupon.mutate(c.id)}
+                    >
+                      Deactivate
+                    </Button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
