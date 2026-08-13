@@ -57,6 +57,12 @@ export class CreateCourseDto {
   @Max(50)
   includedLiveSessions?: number;
 
+  // Admin-only: the instructor this course belongs to (admins build courses on
+  // an instructor's behalf).
+  @IsOptional()
+  @IsString()
+  instructorId?: string;
+
   @IsOptional()
   @IsString()
   @MaxLength(180)

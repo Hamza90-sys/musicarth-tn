@@ -21,6 +21,11 @@ export class UpdateCourseDto {
   @Min(0)
   @Max(50)
   includedLiveSessions?: number;
+
+  // Admin-only: reassign the course to a different instructor.
+  @IsOptional()
+  @IsString()
+  instructorId?: string;
   @IsOptional()
   @IsString()
   @MinLength(3)

@@ -99,7 +99,7 @@ function InstructorDashboard() {
             {t("welcomeBack")}, {firstName}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create courses, upload lessons, and manage your live sessions.
+            View your courses and manage your live sessions.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -208,7 +208,7 @@ function InstructorDashboard() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-lg">My courses</CardTitle>
-              <CardDescription>Courses you author on Musicarth.</CardDescription>
+              <CardDescription>Courses assigned to you on Musicarth.</CardDescription>
             </div>
             <Button asChild variant="ghost" size="sm" className="gap-1 text-muted-foreground">
               <Link to="/courses">
@@ -221,8 +221,8 @@ function InstructorDashboard() {
               <p className="text-sm text-muted-foreground">Loading…</p>
             ) : myCourses.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border/60 p-6 text-sm text-muted-foreground">
-                You have no courses yet. Go to <strong>My Courses</strong> and click{" "}
-                <strong>Create new course</strong> to start.
+                No courses assigned to you yet. The Musicarth team builds courses — yours will
+                appear here once assigned.
               </div>
             ) : (
               myCourses.slice(0, 5).map((c) => {

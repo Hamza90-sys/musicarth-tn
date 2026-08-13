@@ -44,6 +44,14 @@ export class CoursesController {
     return this.coursesService.getFeaturedInstructors();
   }
 
+  // Admin — every instructor, for the course builder's owner picker.
+  @Get('instructors/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async listInstructors() {
+    return this.coursesService.listInstructors();
+  }
+
   @Get(':courseId')
   async getCourseById(@Param('courseId') courseId: string) {
     return this.coursesService.getCourseById(courseId);
@@ -93,7 +101,7 @@ export class CoursesController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async createCourse(
     @Body() dto: CreateCourseDto,
     @CurrentUser() user: { sub: string; role: string },
@@ -103,7 +111,7 @@ export class CoursesController {
 
   @Patch(':courseId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async updateCourse(
     @Param('courseId') courseId: string,
     @Body() dto: UpdateCourseDto,
@@ -114,7 +122,7 @@ export class CoursesController {
 
   @Post(':courseId/publish')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async publishCourse(
     @Param('courseId') courseId: string,
     @CurrentUser() user: { sub: string; role: string },
@@ -124,7 +132,7 @@ export class CoursesController {
 
   @Post(':courseId/sections')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async createSection(
     @Param('courseId') courseId: string,
     @Body() dto: CreateSectionDto,
@@ -135,7 +143,7 @@ export class CoursesController {
 
   @Post('sections/:sectionId/lessons')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async createLesson(
     @Param('sectionId') sectionId: string,
     @Body() dto: CreateLessonDto,
@@ -146,7 +154,7 @@ export class CoursesController {
 
   @Patch('lessons/:lessonId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async updateLesson(
     @Param('lessonId') lessonId: string,
     @Body() dto: UpdateLessonDto,
@@ -157,7 +165,7 @@ export class CoursesController {
 
   @Delete(':courseId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async deleteCourse(
     @Param('courseId') courseId: string,
     @CurrentUser() user: { sub: string; role: string },
@@ -167,7 +175,7 @@ export class CoursesController {
 
   @Delete('sections/:sectionId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async deleteSection(
     @Param('sectionId') sectionId: string,
     @CurrentUser() user: { sub: string; role: string },
@@ -177,7 +185,7 @@ export class CoursesController {
 
   @Delete('lessons/:lessonId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async deleteLesson(
     @Param('lessonId') lessonId: string,
     @CurrentUser() user: { sub: string; role: string },
@@ -187,7 +195,7 @@ export class CoursesController {
 
   @Patch(':courseId/sections/reorder')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async reorderSections(
     @Param('courseId') courseId: string,
     @Body() dto: ReorderSectionsDto,
@@ -198,7 +206,7 @@ export class CoursesController {
 
   @Patch('sections/:sectionId/lessons/reorder')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async reorderLessons(
     @Param('sectionId') sectionId: string,
     @Body() dto: ReorderLessonsDto,

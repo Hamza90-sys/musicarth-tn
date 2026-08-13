@@ -108,6 +108,14 @@ export class CoursesService {
     dto: CreateCourseDto,
     actor: { sub: string; role: string },
   ) {
+    // Admins build courses on an instructor's behalf and pick the owner. If no
+    // instructor is chosen yet (draft), it's assigned later in the builder.
+    let instructorId: string | null = null;
+    if (dto.instructorId) {
+      await this.assertValidInstructor(dto.instructorId);
+      instructorId = dto.instructorId;
+    }
+
     const course = await this.prisma.course.create({
       data: {
         title: dto.title,
@@ -127,14 +135,31 @@ export class CoursesService {
         thumbnailUrl: dto.thumbnailUrl ?? null,
         isPublished: dto.isPublished ?? false,
         approvalStatus: CourseApprovalStatus.PENDING,
-        instructorId:
-          actor.role === UserRole.INSTRUCTOR || actor.role === UserRole.ADMIN
-            ? actor.sub
-            : null,
+        instructorId,
       },
     });
     await this.searchService.syncCourse(course.id);
     return course;
+  }
+
+  /** All instructors, for the admin course builder's owner picker. */
+  async listInstructors() {
+    return this.prisma.user.findMany({
+      where: { role: UserRole.INSTRUCTOR, deletedAt: null },
+      select: { id: true, fullName: true, email: true, headline: true },
+      orderBy: { fullName: 'asc' },
+    });
+  }
+
+  /** Ensures an id belongs to a real, active instructor before assigning a course. */
+  private async assertValidInstructor(instructorId: string) {
+    const instructor = await this.prisma.user.findFirst({
+      where: { id: instructorId, role: UserRole.INSTRUCTOR, deletedAt: null },
+      select: { id: true },
+    });
+    if (!instructor) {
+      throw new BadRequestException('Selected instructor is invalid');
+    }
   }
 
   async upsertReview(
@@ -252,6 +277,15 @@ export class CoursesService {
 
     this.assertCanManageCourse(course.instructorId, actor);
 
+    // Only an admin may (re)assign the course's instructor.
+    let instructorId: string | undefined;
+    if (dto.instructorId !== undefined && actor.role === UserRole.ADMIN) {
+      if (dto.instructorId) {
+        await this.assertValidInstructor(dto.instructorId);
+      }
+      instructorId = dto.instructorId;
+    }
+
     const updated = await this.prisma.course.update({
       where: { id: courseId },
       data: {
@@ -268,6 +302,7 @@ export class CoursesService {
         thumbnailUrl:
           dto.thumbnailUrl === undefined ? undefined : dto.thumbnailUrl,
         isPublished: dto.isPublished,
+        instructorId,
       },
     });
     await this.searchService.syncCourse(courseId);

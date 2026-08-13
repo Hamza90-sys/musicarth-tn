@@ -1,13 +1,12 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Users, BookOpen, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
-import { apiFetch, ApiError } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { Users, BookOpen, ArrowRight } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 import { getStoredAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/courses/")({
@@ -31,38 +30,15 @@ type Course = {
 function MyCoursesPage() {
   const { t } = useI18n();
   const auth = getStoredAuth();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const coursesQuery = useQuery({
     queryKey: ["instructor-courses"],
     queryFn: () => apiFetch<Course[]>("/courses"),
   });
 
-  // One click: create a draft course, then open the builder to fill in everything.
-  const createCourse = useMutation({
-    mutationFn: () =>
-      apiFetch<Course>("/courses", {
-        method: "POST",
-        body: JSON.stringify({
-          title: "Untitled course",
-          description: "Draft course — add your description in the builder.",
-          instrument: "piano",
-          level: "beginner",
-          price: 0,
-          isPublished: false,
-        }),
-      }),
-    onSuccess: async (course) => {
-      await queryClient.invalidateQueries({ queryKey: ["instructor-courses"] });
-      navigate({ to: "/courses/$courseId", params: { courseId: course.id } });
-    },
-    onError: (e) => toast.error(e instanceof ApiError ? e.message : "Could not create course"),
-  });
-
   const myCourses = useMemo(() => {
     const all = coursesQuery.data ?? [];
-    if (!auth?.user.id) return all;
+    if (!auth?.user.id) return [];
     return all.filter((c) => c.instructor?.id === auth.user.id);
   }, [coursesQuery.data, auth?.user.id]);
 
@@ -75,16 +51,11 @@ function MyCoursesPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 sm:px-6 md:px-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{t("myCoursesTitle")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("myCoursesSub2")}
-          </p>
-        </div>
-        <Button className="gap-2" onClick={() => createCourse.mutate()} disabled={createCourse.isPending}>
-          <Plus className="h-4 w-4" /> {createCourse.isPending ? "…" : t("createNewCourse")}
-        </Button>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{t("myCoursesTitle")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Courses assigned to you by the Musicarth team. Tap a course to view its lessons and students.
+        </p>
       </div>
 
       {coursesQuery.isLoading ? (
@@ -95,13 +66,11 @@ function MyCoursesPage() {
             <BookOpen className="h-10 w-10 text-muted-foreground" />
             <div>
               <h3 className="text-lg font-semibold">No courses yet</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Create your first course to start adding lessons.
+              <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                The Musicarth team builds and publishes courses. Any course assigned to you will
+                appear here.
               </p>
             </div>
-            <Button onClick={() => createCourse.mutate()} disabled={createCourse.isPending} className="gap-2">
-              <Plus className="h-4 w-4" /> {createCourse.isPending ? "…" : t("createNewCourse")}
-            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -134,14 +103,14 @@ function MyCoursesPage() {
                   </div>
                   <div>
                     <div className="mb-1.5 flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Completion</span>
-                      <span className="font-medium">{c.isPublished ? 100 : 0}%</span>
+                      <span className="text-muted-foreground">Status</span>
+                      <span className="font-medium">{c.isPublished ? "Live" : "Draft"}</span>
                     </div>
                     <Progress value={c.isPublished ? 100 : 0} className="h-1.5" />
                   </div>
                   <Button asChild variant="outline" className="w-full gap-2">
                     <Link to="/courses/$courseId" params={{ courseId: c.id }}>
-                      {t("manageCourse")} <ArrowRight className="h-4 w-4" />
+                      View course <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
                 </CardContent>

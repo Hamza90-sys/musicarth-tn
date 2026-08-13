@@ -22,7 +22,7 @@ export class VideoController {
 
   @Post('lessons/:lessonId/upload-url')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async createUploadUrl(
     @Param('lessonId') lessonId: string,
     @CurrentUser() user: { sub: string },
@@ -48,7 +48,7 @@ export class VideoController {
   // Poll Mux for the latest video status (fallback when webhooks can't reach us).
   @Post('lessons/:lessonId/sync')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   async syncLessonVideo(
     @Param('lessonId') lessonId: string,
     @CurrentUser() user: { sub: string },
