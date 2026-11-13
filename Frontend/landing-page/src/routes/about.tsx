@@ -20,12 +20,11 @@ function AboutPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">Who we are</h2>
             <p className="mt-3">
-              Musicarth was founded by <strong>Hamza Chargui</strong> and{" "}
-              <strong>Rayen Trabelsi</strong>, two builders from Tunisia who believe that quality
-              music education shouldn&apos;t depend on where you live, what schedule you keep, or
-              which conservatory will take you. We started Musicarth to remove those barriers and
-              put world-class instruction in the hands of every learner in the Maghreb — and
-              beyond.
+              Musicarth is operated by <strong>BSMART GO</strong>, a Tunisian company committed to
+              making quality music education accessible regardless of where you live, what schedule
+              you keep, or which conservatory will take you. BSMART GO created Musicarth to remove
+              those barriers and put world-class instruction in the hands of every learner in the
+              Maghreb — and beyond.
             </p>
           </section>
 
@@ -35,8 +34,8 @@ function AboutPage() {
               Traditional music schools force students into fixed timetables, long commutes, and
               one-size-fits-all lessons during low-energy hours. Talented instructors, meanwhile,
               have no simple way to reach students or earn a fair living from their craft. Musicarth
-              fixes both sides of that gap: learners study any instrument on their own schedule,
-              and certified instructors teach, publish, and get paid on a single platform.
+              fixes both sides of that gap: learners study any instrument on their own schedule, and
+              certified instructors teach, publish, and get paid on a single platform.
             </p>
           </section>
 
@@ -69,14 +68,16 @@ function AboutPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">Our purpose</h2>
             <p className="mt-3">
-              To make learning music <strong>flexible, affordable, and genuinely effective</strong> —
-              covering string, keyboard, percussion, wind, voice, music production (MAO), and theory,
-              including traditional Maghrebi instruments and the Maqam vocal tradition.
+              To make learning music <strong>flexible, affordable, and genuinely effective</strong>{" "}
+              — covering string, keyboard, percussion, wind, voice, music production (MAO), and
+              theory, including traditional Maghrebi instruments and the Maqam vocal tradition.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-foreground">The goals we&apos;re working toward</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              The goals we&apos;re working toward
+            </h2>
             <ul className="mt-3 space-y-2">
               <li>
                 <strong>Access</strong> — let anyone with an internet connection learn any
@@ -98,7 +99,7 @@ function AboutPage() {
           </section>
 
           <p className="border-t border-foreground/10 pt-6 text-sm text-foreground/60">
-            Questions or ideas? Reach the founders at{" "}
+            Questions or ideas? Contact BSMART GO at{" "}
             <a href="mailto:musicarthtn@gmail.com" className="text-primary hover:underline">
               musicarthtn@gmail.com
             </a>

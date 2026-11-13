@@ -144,6 +144,7 @@ const translations = {
     footBecomeInstructor: "Become an instructor",
     footJoinStudent: "Join as a student",
     footerRights: "Composed with care.",
+    footerPoweredBy: "Powered by BSMART GO.",
   },
   fr: {
     navCourses: "Cours",
@@ -281,6 +282,7 @@ const translations = {
     footBecomeInstructor: "Devenir instructeur",
     footJoinStudent: "Rejoindre en tant qu'élève",
     footerRights: "Composé avec soin.",
+    footerPoweredBy: "Propulsé par BSMART GO.",
   },
 } as const;
 

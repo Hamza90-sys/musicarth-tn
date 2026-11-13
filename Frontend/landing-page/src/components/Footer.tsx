@@ -106,7 +106,9 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-violet-200/80 pt-6">
-          <div className="text-xs text-slate-500">© {new Date().getFullYear()} Musicarth. {t("footerRights")}</div>
+          <div className="text-xs text-slate-500">
+            © {new Date().getFullYear()} Musicarth. {t("footerRights")} {t("footerPoweredBy")}
+          </div>
           <div className="flex items-center gap-4 text-xs text-slate-700">
             <div className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white p-1 shadow-sm">
               {LANGS.map((l) => (
